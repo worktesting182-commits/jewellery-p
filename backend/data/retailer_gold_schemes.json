@@ -1,0 +1,48 @@
+[
+  {
+    "id": "scheme-1786971011888",
+    "retailer_id": "07b69c53-c6fb-4d07-8ff8-2b24cc34f2c0",
+    "title": "asdsc",
+    "description": "adass",
+    "fixed_gold_rate": 7245,
+    "monthly_amount": 5000,
+    "target_gold_grams": 7.5914,
+    "time_period_months": 11,
+    "frequency": "MONTHLY",
+    "bonus_description": "100% 12th Month Installment Bonus by Store",
+    "status": "ACTIVE",
+    "created_at": "2026-08-17T12:50:11.674Z",
+    "updated_at": "2026-08-17T12:50:11.674Z",
+    "retailer_name": "ABC Jewellery Shop"
+  },
+  {
+    "id": "scheme-swarna-11",
+    "retailer_id": "default-retailer",
+    "retailer_name": "Aura Master Retailer",
+    "title": "Swarna Sanchaya 11-Month Gold Scheme",
+    "description": "Save monthly for 11 months with locked gold rate. Pay 11 monthly installments and get 100% of 12th installment as bonus from store at maturity!",
+    "fixed_gold_rate": 7245,
+    "monthly_amount": 5000,
+    "target_gold_grams": 7.5845,
+    "time_period_months": 11,
+    "frequency": "MONTHLY",
+    "bonus_description": "100% 12th Month Installment Bonus by Store",
+    "status": "ACTIVE",
+    "created_at": "2026-08-17T18:00:00.000Z"
+  },
+  {
+    "id": "scheme-kanaka-6",
+    "retailer_id": "default-retailer",
+    "retailer_name": "Aura Master Retailer",
+    "title": "Kanakavrushti 6-Month Express Gold Scheme",
+    "description": "Fast-track 6-month gold accumulation plan with fixed gold rate protection against market volatility.",
+    "fixed_gold_rate": 7200,
+    "monthly_amount": 10000,
+    "target_gold_grams": 8.3333,
+    "time_period_months": 6,
+    "frequency": "MONTHLY",
+    "bonus_description": "50% Making Charge Discount at Maturity",
+    "status": "ACTIVE",
+    "created_at": "2026-08-17T18:00:00.000Z"
+  }
+]
