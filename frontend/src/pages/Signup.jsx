@@ -150,6 +150,8 @@ export default function Signup() {
         friendlyMessage.includes("User already registered")
       ) {
         friendlyMessage = "An account with this email address already exists. Please log in.";
+      } else if (friendlyMessage.toLowerCase().includes("rate limit")) {
+        friendlyMessage = "Email signup rate limit exceeded by Supabase security. Please try logging in or wait a few minutes.";
       }
       setErrorMsg(friendlyMessage);
     } finally {
