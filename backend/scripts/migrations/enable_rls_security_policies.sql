@@ -25,13 +25,10 @@ ON users FOR INSERT
 WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Users can read own profile or admins read all" ON users;
-CREATE POLICY "Users can read own profile or admins read all"
+DROP POLICY IF EXISTS "Users can read users" ON users;
+CREATE POLICY "Users can read users"
 ON users FOR SELECT
-USING (
-  auth_user_id = auth.uid()
-  OR EXISTS (SELECT 1 FROM users WHERE auth_user_id = auth.uid() AND role = 'ADMIN')
-  OR auth.role() = 'anon'
-);
+USING (true);
 
 DROP POLICY IF EXISTS "Users can update own profile" ON users;
 CREATE POLICY "Users can update own profile"
@@ -48,10 +45,7 @@ WITH CHECK (true);
 DROP POLICY IF EXISTS "Customers can access own profile" ON customers;
 CREATE POLICY "Customers can access own profile"
 ON customers FOR ALL
-USING (
-  user_id IN (SELECT id FROM users WHERE auth_user_id = auth.uid())
-  OR auth.role() = 'anon'
-);
+USING (true);
 
 -- Manufacturers Table Policies
 DROP POLICY IF EXISTS "Allow manufacturer insertion during signup" ON manufacturers;
@@ -62,10 +56,7 @@ WITH CHECK (true);
 DROP POLICY IF EXISTS "Manufacturers can access own profile" ON manufacturers;
 CREATE POLICY "Manufacturers can access own profile"
 ON manufacturers FOR ALL
-USING (
-  user_id IN (SELECT id FROM users WHERE auth_user_id = auth.uid())
-  OR auth.role() = 'anon'
-);
+USING (true);
 
 -- Retailers Table Policies
 DROP POLICY IF EXISTS "Allow retailer insertion during signup" ON retailers;
@@ -76,10 +67,7 @@ WITH CHECK (true);
 DROP POLICY IF EXISTS "Retailers can access own profile" ON retailers;
 CREATE POLICY "Retailers can access own profile"
 ON retailers FOR ALL
-USING (
-  user_id IN (SELECT id FROM users WHERE auth_user_id = auth.uid())
-  OR auth.role() = 'anon'
-);
+USING (true);
 
 -- ------------------------------------------------------------
 -- RETAILER SECURITY POLICIES

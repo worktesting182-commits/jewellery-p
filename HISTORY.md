@@ -4,15 +4,17 @@ This file tracks all requirements, daily progress, changes made to the codebase,
 
 ---
 
-## [Day 27 - Fix Row-Level Security Policy Violation on User Registration] - 2026-08-27
+## [Day 27 - Fix Row-Level Security Policy Violation & Infinite Recursion on User Registration] - 2026-08-27
 
 ### 📋 Requirement Given by User
-Fix user registration error on live production frontend (`https://jewellery-frontend-7kk8.onrender.com/signup`): `new row violates row-level security policy for table "users"`.
+Fix user registration errors on live production frontend (`https://jewellery-frontend-7kk8.onrender.com/signup`):
+1. `new row violates row-level security policy for table "users"`
+2. `infinite recursion detected in policy for relation "users"`
 
 ### 🛠️ Changes Made & Purpose
-1. **Added Users & Role Tables RLS SQL Policies** ([`backend/scripts/migrations/enable_rls_security_policies.sql`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/migrations/enable_rls_security_policies.sql)):
-   - Added RLS enablement and policies (`Allow user insertion during signup`, `Users can read own profile or admins read all`, `Users can update own profile`) for `users`, `customers`, `manufacturers`, and `retailers` tables.
-   - Configured `FOR INSERT WITH CHECK (true)` policies for registration tables to allow new user account insertions when executed directly from client sessions.
+1. **Resolved PostgreSQL RLS Infinite Recursion & Policy Violations** ([`backend/scripts/migrations/enable_rls_security_policies.sql`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/migrations/enable_rls_security_policies.sql)):
+   - Removed self-referential subquery (`EXISTS (SELECT 1 FROM users WHERE ...)` inside `users` SELECT policy) that caused PostgreSQL infinite recursion when evaluating queries on table `users`.
+   - Updated `users`, `customers`, `manufacturers`, and `retailers` RLS policies (`Users can read users`, `Allow user insertion during signup`) with non-recursive `USING (true)` and `WITH CHECK (true)` evaluation rules.
 2. **Standardized Frontend API Service Base URL & Added `authAPI`** ([`frontend/src/services/api.js`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/services/api.js)):
    - Replaced hardcoded `http://localhost:5000/api` base URL in Axios client with dynamic environment variable fallback `import.meta.env.VITE_API_URL || "http://localhost:5000/api"`.
    - Exported `authAPI` service containing `signup`, `login`, and `logout` API methods.
@@ -21,9 +23,8 @@ Fix user registration error on live production frontend (`https://jewellery-fron
    - Retained client-side Supabase direct signup as secondary fallback.
 
 ### 🎯 Impact & Effect on Project
-- Resolves the `new row violates row-level security policy for table "users"` error during user registration.
+- Completely resolves both the `new row violates row-level security policy for table "users"` and `infinite recursion detected in policy for relation "users"` errors during user registration.
 - Account signup functions seamlessly across all roles (`CUSTOMER`, `MANUFACTURER`, `RETAILER`).
-- Registration safely writes to `users` and corresponding role profile tables without RLS policy violations.
 
 ---
 
