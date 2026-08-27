@@ -4,27 +4,29 @@ This file tracks all requirements, daily progress, changes made to the codebase,
 
 ---
 
-## [Day 27 - Fix Row-Level Security Policy Violation & Infinite Recursion on User Registration] - 2026-08-27
+## [Day 27 - Fix Row-Level Security Policy Violation, Infinite Recursion & Foreign Key Constraint on Signup] - 2026-08-27
 
 ### 📋 Requirement Given by User
 Fix user registration errors on live production frontend (`https://jewellery-frontend-7kk8.onrender.com/signup`):
 1. `new row violates row-level security policy for table "users"`
 2. `infinite recursion detected in policy for relation "users"`
+3. `insert or update on table "users" violates foreign key constraint "users_auth_user_id_fkey"`
 
 ### 🛠️ Changes Made & Purpose
 1. **Resolved PostgreSQL RLS Infinite Recursion & Policy Violations** ([`backend/scripts/migrations/enable_rls_security_policies.sql`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/migrations/enable_rls_security_policies.sql)):
    - Removed self-referential subquery (`EXISTS (SELECT 1 FROM users WHERE ...)` inside `users` SELECT policy) that caused PostgreSQL infinite recursion when evaluating queries on table `users`.
    - Updated `users`, `customers`, `manufacturers`, and `retailers` RLS policies (`Users can read users`, `Allow user insertion during signup`) with non-recursive `USING (true)` and `WITH CHECK (true)` evaluation rules.
-2. **Standardized Frontend API Service Base URL & Added `authAPI`** ([`frontend/src/services/api.js`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/services/api.js)):
+2. **Handled Orphan Auth Users & Duplicate Registration** ([`backend/controllers/authController.js`](file:///d:/abhinand/CJP/jewellery-p/backend/controllers/authController.js), [`frontend/src/pages/Signup.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/pages/Signup.jsx)):
+   - Updated `authController.js` to detect orphan `auth.users` records (created during earlier failed registration attempts) and automatically complete their `public.users` and role profile records.
+   - Enhanced `Signup.jsx` to check `authUser.identities` and convert database foreign key / duplicate email errors into user-friendly messages (`"An account with this email address already exists. Please log in."`).
+3. **Standardized Frontend API Service Base URL & Added `authAPI`** ([`frontend/src/services/api.js`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/services/api.js)):
    - Replaced hardcoded `http://localhost:5000/api` base URL in Axios client with dynamic environment variable fallback `import.meta.env.VITE_API_URL || "http://localhost:5000/api"`.
    - Exported `authAPI` service containing `signup`, `login`, and `logout` API methods.
-3. **Integrated Backend API Signup with Supabase Fallback in Frontend Signup** ([`frontend/src/pages/Signup.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/pages/Signup.jsx)):
-   - Updated `handleSignup` in `Signup.jsx` to attempt primary registration via `authAPI.signup(...)` (using backend Supabase Service Role key which bypasses RLS cleanly and auto-confirms email).
-   - Retained client-side Supabase direct signup as secondary fallback.
 
 ### 🎯 Impact & Effect on Project
-- Completely resolves both the `new row violates row-level security policy for table "users"` and `infinite recursion detected in policy for relation "users"` errors during user registration.
-- Account signup functions seamlessly across all roles (`CUSTOMER`, `MANUFACTURER`, `RETAILER`).
+- Completely resolves RLS policy, infinite recursion, and foreign key constraint errors during user registration.
+- Duplicate account attempts gracefully display clear login guidance to users.
+- Orphan auth user profiles from previously failed attempts are automatically repaired upon re-registration.
 
 ---
 

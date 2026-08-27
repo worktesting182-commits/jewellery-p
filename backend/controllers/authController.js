@@ -38,6 +38,7 @@ export const signup = async (req, res) => {
             });
         }
 
+        let authUserId;
         const { data, error } = await supabaseAdmin.auth.admin.createUser({
             email: normalizedEmail,
             password,
@@ -45,16 +46,41 @@ export const signup = async (req, res) => {
         });
 
         if (error) {
-            return res.status(400).json({
-                success: false,
-                message: error.message,
-            });
+            // Check if profile already exists in public.users table
+            const { data: existingDbUser } = await supabaseAdmin
+                .from("users")
+                .select("id")
+                .eq("email", normalizedEmail)
+                .maybeSingle();
+
+            if (existingDbUser) {
+                return res.status(400).json({
+                    success: false,
+                    message: "An account with this email address already exists. Please log in.",
+                });
+            }
+
+            // Handle orphan auth.users record (e.g., created during previous failed client-side attempt)
+            const { data: { users: userList }, error: listErr } = await supabaseAdmin.auth.admin.listUsers();
+            const existingAuthUser = userList?.find(u => u.email?.toLowerCase() === normalizedEmail);
+
+            if (existingAuthUser) {
+                authUserId = existingAuthUser.id;
+                await supabaseAdmin.auth.admin.updateUserById(authUserId, { password, email_confirm: true });
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    message: error.message || "Unable to create account",
+                });
+            }
+        } else {
+            authUserId = data.user.id;
         }
 
         const { data: createdUser, error: userError } = await supabaseAdmin
             .from("users")
             .insert({
-                auth_user_id: data.user.id,
+                auth_user_id: authUserId,
                 full_name: full_name.trim(),
                 email: normalizedEmail,
                 phone,
@@ -64,7 +90,9 @@ export const signup = async (req, res) => {
             .single();
 
         if (userError) {
-            await supabaseAdmin.auth.admin.deleteUser(data.user.id);
+            if (!error) {
+                await supabaseAdmin.auth.admin.deleteUser(authUserId);
+            }
 
             return res.status(400).json({
                 success: false,

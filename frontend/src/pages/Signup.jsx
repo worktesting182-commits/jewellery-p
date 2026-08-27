@@ -101,6 +101,11 @@ export default function Signup() {
         throw new Error("Signup failed. Unable to create authentication credentials.");
       }
 
+      // Check if Supabase returned existing user without creating a new identity
+      if (authUser.identities && authUser.identities.length === 0) {
+        throw new Error("An account with this email address already exists. Please log in.");
+      }
+
       // Insert into users table
       const { data: newUser, error: userError } = await supabase
         .from("users")
@@ -136,7 +141,17 @@ export default function Signup() {
       }, 1500);
     } catch (err) {
       console.error("Signup Error:", err);
-      setErrorMsg(err.message || "Failed to create account. Please try again.");
+      let friendlyMessage = err.message || "Failed to create account. Please try again.";
+      if (
+        friendlyMessage.includes("users_auth_user_id_fkey") ||
+        friendlyMessage.includes("already registered") ||
+        friendlyMessage.includes("already exists") ||
+        friendlyMessage.includes("unique constraint") ||
+        friendlyMessage.includes("User already registered")
+      ) {
+        friendlyMessage = "An account with this email address already exists. Please log in.";
+      }
+      setErrorMsg(friendlyMessage);
     } finally {
       setLoading(false);
     }
