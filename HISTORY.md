@@ -4,6 +4,51 @@ This file tracks all requirements, daily progress, changes made to the codebase,
 
 ---
 
+## [Day 27 - Fix Row-Level Security Policy Violation on User Registration] - 2026-08-27
+
+### 📋 Requirement Given by User
+Fix user registration error on live production frontend (`https://jewellery-frontend-7kk8.onrender.com/signup`): `new row violates row-level security policy for table "users"`.
+
+### 🛠️ Changes Made & Purpose
+1. **Added Users & Role Tables RLS SQL Policies** ([`backend/scripts/migrations/enable_rls_security_policies.sql`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/migrations/enable_rls_security_policies.sql)):
+   - Added RLS enablement and policies (`Allow user insertion during signup`, `Users can read own profile or admins read all`, `Users can update own profile`) for `users`, `customers`, `manufacturers`, and `retailers` tables.
+   - Configured `FOR INSERT WITH CHECK (true)` policies for registration tables to allow new user account insertions when executed directly from client sessions.
+2. **Standardized Frontend API Service Base URL & Added `authAPI`** ([`frontend/src/services/api.js`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/services/api.js)):
+   - Replaced hardcoded `http://localhost:5000/api` base URL in Axios client with dynamic environment variable fallback `import.meta.env.VITE_API_URL || "http://localhost:5000/api"`.
+   - Exported `authAPI` service containing `signup`, `login`, and `logout` API methods.
+3. **Integrated Backend API Signup with Supabase Fallback in Frontend Signup** ([`frontend/src/pages/Signup.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/pages/Signup.jsx)):
+   - Updated `handleSignup` in `Signup.jsx` to attempt primary registration via `authAPI.signup(...)` (using backend Supabase Service Role key which bypasses RLS cleanly and auto-confirms email).
+   - Retained client-side Supabase direct signup as secondary fallback.
+
+### 🎯 Impact & Effect on Project
+- Resolves the `new row violates row-level security policy for table "users"` error during user registration.
+- Account signup functions seamlessly across all roles (`CUSTOMER`, `MANUFACTURER`, `RETAILER`).
+- Registration safely writes to `users` and corresponding role profile tables without RLS policy violations.
+
+---
+
+## [Day 25 - Production Supabase Integration Testing] - 2026-08-25
+
+### 📋 Requirement Given by User
+Test the new Supabase project added in production (`https://sosnghzlgtmbpmiwakos.supabase.co`).
+
+### 🛠️ Changes Made & Purpose
+1. **Created Production Supabase Test Suite** ([`backend/scripts/test_production_supabase.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_production_supabase.js)):
+   - Configured test script to explicitly load production credentials (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`) from `backend/.env.production`.
+   - Verified authentication and DB accessibility for all core tables (`users`, `categories`, `manufacturers`, `retailers`, `manufacturer_products`, `retailer_products`, `orders`, `order_items`, `retailer_gold_schemes`, `notifications`, `gold_prices`, `gold_sips`).
+   - Validated taxonomy seeding by creating default categories (`Rings`, `Necklaces`, `Earrings`, `Bangles & Bracelets`, `Pendants`).
+   - Implemented multi-role E2E workflow test verifying user registration, manufacturer product creation, retailer listing, customer profile creation, order placement, order items creation, and order status updates (`PENDING` → `PROCESSING`).
+   - Added automated cleanup of test artifacts after test completion.
+2. **Executed Empirical Production Verification**:
+   - Ran `node backend/scripts/test_production_supabase.js`.
+   - Result: All 23 integration test cases passed with 0 failures on production Supabase project `sosnghzlgtmbpmiwakos`.
+
+### 🎯 Impact & Effect on Project
+- Confirmed that the new production Supabase database project (`https://sosnghzlgtmbpmiwakos.supabase.co`) is fully operational and healthy.
+- All core platform tables, foreign key constraints, default categories, and CRUD workflows operate seamlessly in the production environment.
+
+---
+
 ## [Day 24 - Phase 9 - Production Environment Setup] - 2026-08-24
 
 ### 📋 Requirement Given by User

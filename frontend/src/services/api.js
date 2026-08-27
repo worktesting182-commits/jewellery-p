@@ -1,8 +1,10 @@
 import axios from "axios";
 import { supabase } from "../lib/supabase";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
 const api = axios.create({
-    baseURL: "http://localhost:5000/api", // Change if your backend runs elsewhere
+    baseURL: API_BASE_URL,
     headers: {
         "Content-Type": "application/json",
     },
@@ -19,6 +21,12 @@ api.interceptors.request.use(async (config) => {
 
     return config;
 });
+
+export const authAPI = {
+    signup: (userData) => api.post("/auth/signup", userData),
+    login: (credentials) => api.post("/auth/login", credentials),
+    logout: () => api.post("/auth/logout"),
+};
 
 export const cartAPI = {
     getCart: () => api.get("/cart"),

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { authAPI } from "../services/api";
 import {
   Gem,
   User,
@@ -64,7 +65,30 @@ export default function Signup() {
     }
 
     try {
-      // 1. Create auth user in Supabase
+      // 1. Primary path: Call Backend Signup API (uses Supabase Service Role to safely bypass RLS)
+      try {
+        const response = await authAPI.signup({
+          full_name: fullName.trim(),
+          email: email.trim(),
+          password: password,
+          role: role,
+        });
+
+        if (response.data && response.data.success) {
+          setSuccessMsg("Account created successfully! Redirecting to login...");
+          setTimeout(() => {
+            navigate("/login");
+          }, 1500);
+          return;
+        }
+      } catch (apiErr) {
+        console.warn("Backend API signup unavailable or failed, attempting direct Supabase signup:", apiErr?.response?.data?.message || apiErr.message);
+        if (apiErr?.response?.data?.message) {
+          throw new Error(apiErr.response.data.message);
+        }
+      }
+
+      // 2. Fallback path: Direct Supabase Client Signup
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -77,7 +101,7 @@ export default function Signup() {
         throw new Error("Signup failed. Unable to create authentication credentials.");
       }
 
-      // 2. Insert into users table
+      // Insert into users table
       const { data: newUser, error: userError } = await supabase
         .from("users")
         .insert({
@@ -93,7 +117,7 @@ export default function Signup() {
 
       const userId = newUser.id;
 
-      // 3. Insert into corresponding role-specific table
+      // Insert into corresponding role-specific table
       if (role === "CUSTOMER") {
         const { error: err } = await supabase.from("customers").insert({ user_id: userId });
         if (err) throw err;

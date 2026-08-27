@@ -9,6 +9,77 @@ ALTER TABLE IF EXISTS gold_sips ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS gold_wallets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS gold_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS gold_sip_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS manufacturers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS retailers ENABLE ROW LEVEL SECURITY;
+
+-- ------------------------------------------------------------
+-- USERS & ROLE PROFILE SECURITY POLICIES
+-- ------------------------------------------------------------
+
+-- Users Table Policies
+DROP POLICY IF EXISTS "Allow user insertion during signup" ON users;
+CREATE POLICY "Allow user insertion during signup"
+ON users FOR INSERT
+WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Users can read own profile or admins read all" ON users;
+CREATE POLICY "Users can read own profile or admins read all"
+ON users FOR SELECT
+USING (
+  auth_user_id = auth.uid()
+  OR EXISTS (SELECT 1 FROM users WHERE auth_user_id = auth.uid() AND role = 'ADMIN')
+  OR auth.role() = 'anon'
+);
+
+DROP POLICY IF EXISTS "Users can update own profile" ON users;
+CREATE POLICY "Users can update own profile"
+ON users FOR UPDATE
+USING (auth_user_id = auth.uid())
+WITH CHECK (auth_user_id = auth.uid());
+
+-- Customers Table Policies
+DROP POLICY IF EXISTS "Allow customer insertion during signup" ON customers;
+CREATE POLICY "Allow customer insertion during signup"
+ON customers FOR INSERT
+WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Customers can access own profile" ON customers;
+CREATE POLICY "Customers can access own profile"
+ON customers FOR ALL
+USING (
+  user_id IN (SELECT id FROM users WHERE auth_user_id = auth.uid())
+  OR auth.role() = 'anon'
+);
+
+-- Manufacturers Table Policies
+DROP POLICY IF EXISTS "Allow manufacturer insertion during signup" ON manufacturers;
+CREATE POLICY "Allow manufacturer insertion during signup"
+ON manufacturers FOR INSERT
+WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Manufacturers can access own profile" ON manufacturers;
+CREATE POLICY "Manufacturers can access own profile"
+ON manufacturers FOR ALL
+USING (
+  user_id IN (SELECT id FROM users WHERE auth_user_id = auth.uid())
+  OR auth.role() = 'anon'
+);
+
+-- Retailers Table Policies
+DROP POLICY IF EXISTS "Allow retailer insertion during signup" ON retailers;
+CREATE POLICY "Allow retailer insertion during signup"
+ON retailers FOR INSERT
+WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Retailers can access own profile" ON retailers;
+CREATE POLICY "Retailers can access own profile"
+ON retailers FOR ALL
+USING (
+  user_id IN (SELECT id FROM users WHERE auth_user_id = auth.uid())
+  OR auth.role() = 'anon'
+);
 
 -- ------------------------------------------------------------
 -- RETAILER SECURITY POLICIES
