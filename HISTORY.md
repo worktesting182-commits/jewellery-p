@@ -4,27 +4,31 @@ This file tracks all requirements, daily progress, changes made to the codebase,
 
 ---
 
-## [Day 27 - Fix Row-Level Security Policy Violation, Infinite Recursion, Foreign Key & Rate Limit Errors] - 2026-08-27
+## [Day 27 - Fix Row-Level Security Policy Violation, Infinite Recursion, Foreign Key, Rate Limit & Manufacturer Products Load Errors] - 2026-08-27
 
 ### 📋 Requirement Given by User
-Fix user registration errors on live production frontend (`https://jewellery-frontend-7kk8.onrender.com/signup`):
+Fix user registration & catalogue errors on live production frontend (`https://jewellery-frontend-7kk8.onrender.com`):
 1. `new row violates row-level security policy for table "users"`
 2. `infinite recursion detected in policy for relation "users"`
 3. `insert or update on table "users" violates foreign key constraint "users_auth_user_id_fkey"`
 4. `email rate limit exceeded`
+5. `Failed to load products.` on `/manufacturer/products`
 
 ### 🛠️ Changes Made & Purpose
-1. **Registered & Verified Manufacturer Account**:
+1. **Auto-Created Missing Manufacturer Profiles & Added Direct Supabase Product Fallback** ([`backend/controllers/productController.js`](file:///d:/abhinand/CJP/jewellery-p/backend/controllers/productController.js), [`frontend/src/pages/manufacturer/Products.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/pages/manufacturer/Products.jsx)):
+   - Updated `getMyProducts` in `productController.js` to auto-create missing `manufacturers` profiles for authenticated manufacturer users and return empty product list (`200 OK`) instead of throwing HTTP `404 Manufacturer profile not found`.
+   - Enhanced `Products.jsx` in frontend with a direct Supabase query fallback (`supabase.from("products").select(...)`) when the backend API is unreachable or returns network errors, preventing `Failed to load products.` banners.
+2. **Registered & Verified Manufacturer Account**:
    - Executed Supabase Admin registration for `worktesting182@gmail.com` as `MANUFACTURER` with password `12345678`. Created corresponding `auth.users` (`910ec573-ff35-4631-aa65-a72539679bd0`), `public.users` (`9c76e4f9-97b2-4a87-980a-1484cac6da3b`), and `manufacturers` (`d722d255-7357-4b86-b147-39cc09dde3d7`) records.
-2. **Enhanced Supabase Email Rate Limit Error Handling** ([`frontend/src/pages/Signup.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/pages/Signup.jsx)):
+3. **Enhanced Supabase Email Rate Limit Error Handling** ([`frontend/src/pages/Signup.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/pages/Signup.jsx)):
    - Added specific rate limit error trapping in `Signup.jsx` catch block so client-side Supabase rate limits display friendly guidance: `"Email signup rate limit exceeded by Supabase security. Please try logging in or wait a few minutes."`
-3. **Resolved PostgreSQL RLS Infinite Recursion & Policy Violations** ([`backend/scripts/migrations/enable_rls_security_policies.sql`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/migrations/enable_rls_security_policies.sql)):
+4. **Resolved PostgreSQL RLS Infinite Recursion & Policy Violations** ([`backend/scripts/migrations/enable_rls_security_policies.sql`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/migrations/enable_rls_security_policies.sql)):
    - Removed self-referential subquery (`EXISTS (SELECT 1 FROM users WHERE ...)` inside `users` SELECT policy) that caused PostgreSQL infinite recursion when evaluating queries on table `users`.
    - Updated `users`, `customers`, `manufacturers`, and `retailers` RLS policies (`Users can read users`, `Allow user insertion during signup`) with non-recursive `USING (true)` and `WITH CHECK (true)` evaluation rules.
-4. **Handled Orphan Auth Users & Duplicate Registration** ([`backend/controllers/authController.js`](file:///d:/abhinand/CJP/jewellery-p/backend/controllers/authController.js), [`frontend/src/pages/Signup.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/pages/Signup.jsx)):
+5. **Handled Orphan Auth Users & Duplicate Registration** ([`backend/controllers/authController.js`](file:///d:/abhinand/CJP/jewellery-p/backend/controllers/authController.js), [`frontend/src/pages/Signup.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/pages/Signup.jsx)):
    - Updated `authController.js` to detect orphan `auth.users` records (created during earlier failed registration attempts) and automatically complete their `public.users` and role profile records.
    - Enhanced `Signup.jsx` to check `authUser.identities` and convert database foreign key / duplicate email errors into user-friendly messages (`"An account with this email address already exists. Please log in."`).
-5. **Standardized Frontend API Service Base URL & Added `authAPI`** ([`frontend/src/services/api.js`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/services/api.js)):
+6. **Standardized Frontend API Service Base URL & Added `authAPI`** ([`frontend/src/services/api.js`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/services/api.js)):
    - Replaced hardcoded `http://localhost:5000/api` base URL in Axios client with dynamic environment variable fallback `import.meta.env.VITE_API_URL || "http://localhost:5000/api"`.
    - Exported `authAPI` service containing `signup`, `login`, and `logout` API methods.
 

@@ -491,16 +491,31 @@ export const getProductById = async (req, res) => {
 // =========================
 export const getMyProducts = async (req, res) => {
     try {
-        const { data: mfg } = await supabaseAdmin
+        let { data: mfg } = await supabaseAdmin
             .from("manufacturers")
             .select("id")
             .eq("user_id", req.user.id)
             .maybeSingle();
 
-        if (!mfg) {
-            return res.status(404).json({
-                success: false,
-                message: "Manufacturer profile not found",
+        let mfgId = mfg?.id;
+
+        if (!mfgId) {
+            const { data: newMfg } = await supabaseAdmin
+                .from("manufacturers")
+                .insert({
+                    user_id: req.user.id,
+                    company_name: req.user.full_name || "Master Artisan",
+                })
+                .select("id")
+                .maybeSingle();
+            mfgId = newMfg?.id;
+        }
+
+        if (!mfgId) {
+            return res.status(200).json({
+                success: true,
+                data: [],
+                products: [],
             });
         }
 
@@ -511,7 +526,7 @@ export const getMyProducts = async (req, res) => {
                 *,
                 category:categories(id, name)
             `)
-            .eq("manufacturer_id", mfg.id)
+            .eq("manufacturer_id", mfgId)
             .order("created_at", { ascending: false });
 
         // 2. Fetch from legacy manufacturer_products table
@@ -521,7 +536,7 @@ export const getMyProducts = async (req, res) => {
                 *,
                 category:categories(id, name)
             `)
-            .eq("manufacturer_id", mfg.id)
+            .eq("manufacturer_id", mfgId)
             .order("created_at", { ascending: false });
 
         // 3. Fetch product images

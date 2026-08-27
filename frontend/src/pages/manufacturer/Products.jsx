@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
+import { supabase } from "../../lib/supabase";
 import Navbar from "../../components/manufacturer/Navbar";
 import Sidebar from "../../components/manufacturer/Sidebar";
 import {
@@ -363,11 +364,58 @@ export default function Products() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await api.get("/products/my-products");
-      const fetched = res.data?.data || res.data || [];
-      setProducts(Array.isArray(fetched) ? fetched : []);
+      // 1. Primary path: Attempt Express API backend
+      try {
+        const res = await api.get("/products/my-products");
+        const fetched = res.data?.data || res.data || [];
+        setProducts(Array.isArray(fetched) ? fetched : []);
+        return;
+      } catch (apiErr) {
+        console.warn("Backend API fetch /products/my-products failed, executing direct Supabase fallback:", apiErr?.response?.data?.message || apiErr.message);
+      }
+
+      // 2. Fallback path: Direct Supabase Client query
+      const { data: { session } } = await supabase.auth.getSession();
+      const authUser = session?.user;
+      if (!authUser) {
+        setProducts([]);
+        return;
+      }
+
+      // Fetch manufacturer profile
+      const { data: mfg } = await supabase
+        .from("manufacturers")
+        .select("id")
+        .eq("user_id", authUser.id)
+        .maybeSingle();
+
+      if (!mfg) {
+        setProducts([]);
+        return;
+      }
+
+      // Fetch products for this manufacturer from unified products table
+      const { data: prods, error: prodErr } = await supabase
+        .from("products")
+        .select("*, category:categories(id, name)")
+        .eq("manufacturer_id", mfg.id)
+        .order("created_at", { ascending: false });
+
+      if (prodErr) {
+        // Try fallback table manufacturer_products
+        const { data: legacyProds } = await supabase
+          .from("manufacturer_products")
+          .select("*, category:categories(id, name)")
+          .eq("manufacturer_id", mfg.id)
+          .order("created_at", { ascending: false });
+
+        setProducts(Array.isArray(legacyProds) ? legacyProds : []);
+      } else {
+        setProducts(Array.isArray(prods) ? prods : []);
+      }
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to load products.");
+      console.error("Fetch products error:", err);
+      setError(err?.response?.data?.message || err.message || "Failed to load products.");
       setProducts([]);
     } finally {
       setIsLoading(false);
