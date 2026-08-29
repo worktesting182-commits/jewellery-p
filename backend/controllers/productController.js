@@ -216,6 +216,7 @@ export const getProducts = async (req, res) => {
                 *,
                 manufacturer_product:manufacturer_products (
                     id, name, description, material, purity, weight, category_id, status,
+                    category:categories (id, name),
                     manufacturer:manufacturers(id, company_name)
                 ),
                 retailer:retailers (
@@ -251,6 +252,7 @@ export const getProducts = async (req, res) => {
             const imgUrl = imageMap.get(mp.id) || imageMap.get(listing.id);
             const mfgName = mp.manufacturer?.company_name || "Master Artisan";
             const shopName = ret.shop_name || "Artisan Retailer";
+            const catObj = mp.category || listing.category || null;
 
             return normalizeProduct({
                 id: listing.id,
@@ -269,7 +271,10 @@ export const getProducts = async (req, res) => {
                 stone_price: mp.stone_price || listing.stone_price,
                 stone_cost: mp.stone_cost || listing.stone_cost,
                 stone_details: mp.stone_details || listing.stone_details,
-                category_id: mp.category_id,
+                category_id: mp.category_id || listing.category_id,
+                category: catObj,
+                categories: catObj,
+                category_name: catObj?.name || mp.category_name,
                 manufacturer_name: mfgName,
                 sold_by: shopName,
                 retailer_name: shopName,
@@ -284,7 +289,12 @@ export const getProducts = async (req, res) => {
 
         // Filter out INACTIVE / DISCONTINUED if requested
         if (req.query.category && req.query.category.toLowerCase() !== "all") {
-            formattedProducts = formattedProducts.filter((p) => p.category_id === req.query.category);
+            const reqCat = req.query.category.toLowerCase();
+            formattedProducts = formattedProducts.filter((p) => {
+                const cId = (p.category_id || "").toLowerCase();
+                const cName = (p.category_name || "").toLowerCase();
+                return cId === reqCat || cName === reqCat || cName.includes(reqCat) || reqCat.includes(cName);
+            });
         }
 
         return res.status(200).json({

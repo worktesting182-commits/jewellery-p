@@ -112,10 +112,42 @@ export default function CustomerProducts() {
     }
 
     // 2. Category Filter
-    if (selectedCategory !== "ALL") {
+    if (selectedCategory && selectedCategory !== "ALL" && selectedCategory !== "All Categories") {
+      const sel = selectedCategory.trim().toLowerCase();
+      const selStem = sel.replace(/s$/, "");
+      const selWords = selStem.split(/[\s&,/]+/).filter((w) => w.length > 2);
+
       list = list.filter((p) => {
-        const catName = p.categories?.name || p.category_name;
-        return catName === selectedCategory;
+        const catName = (
+          p.category_name ||
+          p.categories?.name ||
+          p.category?.name ||
+          p.manufacturer_product?.category?.name ||
+          ""
+        ).toLowerCase();
+
+        const catId = (p.category_id || p.categories?.id || "").toLowerCase();
+        const prodName = (p.name || "").toLowerCase();
+
+        // A. Direct exact match
+        if (catName === sel || catId === sel) return true;
+
+        // B. Stem match on category name
+        const catStem = catName.replace(/s$/, "");
+        if (catStem === selStem) return true;
+
+        const catWords = catStem.split(/[\s&,/]+/).filter((w) => w.length > 2);
+        if (selWords.some((w) => catWords.includes(w)) || catWords.some((w) => selWords.includes(w))) {
+          return true;
+        }
+
+        // C. Stem match on product name (only if full word matches, e.g. "Gold Ring" matches "Ring", but NOT "Earring")
+        const prodWords = prodName.replace(/s$/, "").split(/[\s&,/]+/).filter((w) => w.length > 2);
+        if (selWords.some((w) => prodWords.includes(w))) {
+          return true;
+        }
+
+        return false;
       });
     }
 
