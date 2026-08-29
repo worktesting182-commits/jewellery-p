@@ -107,25 +107,25 @@ export const signup = async (req, res) => {
         if (normalizedRole === "MANUFACTURER") {
             profileData = {
                 user_id: createdUser.id,
-                company_name: req.body.company_name,
-                license_number: req.body.license_number,
-                gst_number: req.body.gst_number,
-                address: req.body.address,
-                postal_code: req.body.postal_code,
-                website: req.body.website,
-                description: req.body.description,
+                company_name: req.body.company_name?.trim() || `${full_name.trim()}'s Enterprise`,
+                license_number: req.body.license_number || null,
+                gst_number: req.body.gst_number || null,
+                address: req.body.address || null,
+                postal_code: req.body.postal_code || null,
+                website: req.body.website || null,
+                description: req.body.description || null,
             };
         }
 
         if (normalizedRole === "RETAILER") {
             profileData = {
                 user_id: createdUser.id,
-                shop_name: req.body.shop_name,
-                gst_number: req.body.gst_number,
-                address: req.body.address,
-                postal_code: req.body.postal_code,
-                website: req.body.website,
-                description: req.body.description,
+                shop_name: req.body.shop_name?.trim() || `${full_name.trim()}'s Shop`,
+                gst_number: req.body.gst_number || null,
+                address: req.body.address || null,
+                postal_code: req.body.postal_code || null,
+                website: req.body.website || null,
+                description: req.body.description || null,
             };
         }
 
@@ -137,7 +137,9 @@ export const signup = async (req, res) => {
 
         if (profileError) {
             await supabaseAdmin.from("users").delete().eq("id", createdUser.id);
-            await supabaseAdmin.auth.admin.deleteUser(data.user.id);
+            if (authUserId) {
+                await supabaseAdmin.auth.admin.deleteUser(authUserId);
+            }
 
             return res.status(400).json({
                 success: false,

@@ -45,6 +45,8 @@ export default function Signup() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [shopName, setShopName] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [role, setRole] = useState("CUSTOMER");
   const [showPassword, setShowPassword] = useState(false);
 
@@ -72,6 +74,8 @@ export default function Signup() {
           email: email.trim(),
           password: password,
           role: role,
+          shop_name: role === "RETAILER" ? (shopName.trim() || `${fullName.trim()}'s Shop`) : undefined,
+          company_name: role === "MANUFACTURER" ? (companyName.trim() || `${fullName.trim()}'s Enterprise`) : undefined,
         });
 
         if (response.data && response.data.success) {
@@ -127,10 +131,16 @@ export default function Signup() {
         const { error: err } = await supabase.from("customers").insert({ user_id: userId });
         if (err) throw err;
       } else if (role === "MANUFACTURER") {
-        const { error: err } = await supabase.from("manufacturers").insert({ user_id: userId });
+        const { error: err } = await supabase.from("manufacturers").insert({
+          user_id: userId,
+          company_name: companyName.trim() || `${fullName.trim()}'s Enterprise`,
+        });
         if (err) throw err;
       } else if (role === "RETAILER") {
-        const { error: err } = await supabase.from("retailers").insert({ user_id: userId });
+        const { error: err } = await supabase.from("retailers").insert({
+          user_id: userId,
+          shop_name: shopName.trim() || `${fullName.trim()}'s Shop`,
+        });
         if (err) throw err;
       }
 
@@ -257,6 +267,44 @@ export default function Signup() {
                 />
               </div>
             </div>
+
+            {/* Retailer Shop Name */}
+            {role === "RETAILER" && (
+              <div className="space-y-1.5">
+                <label className="block text-xs font-black uppercase tracking-wider text-black">
+                  Shop Name <span className="text-black/50 font-normal lowercase">(optional)</span>
+                </label>
+                <div className="relative">
+                  <Store className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A68868]" />
+                  <input
+                    type="text"
+                    placeholder="e.g. Vance Fine Jewellers"
+                    value={shopName}
+                    onChange={(e) => setShopName(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 rounded-full bg-white border border-[#CDD5DB] text-black font-extrabold placeholder-black/40 text-xs focus:outline-none focus:border-[#A68868] focus:ring-1 focus:ring-[#A68868] transition-all"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Manufacturer Company Name */}
+            {role === "MANUFACTURER" && (
+              <div className="space-y-1.5">
+                <label className="block text-xs font-black uppercase tracking-wider text-black">
+                  Company / Studio Name <span className="text-black/50 font-normal lowercase">(optional)</span>
+                </label>
+                <div className="relative">
+                  <Factory className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A68868]" />
+                  <input
+                    type="text"
+                    placeholder="e.g. Vance Artisan Studio"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 rounded-full bg-white border border-[#CDD5DB] text-black font-extrabold placeholder-black/40 text-xs focus:outline-none focus:border-[#A68868] focus:ring-1 focus:ring-[#A68868] transition-all"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Email */}
             <div className="space-y-1.5">
