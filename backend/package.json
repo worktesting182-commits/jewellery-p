@@ -4,13 +4,22 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "db:audit": "node scripts/audit_production_schema.js",
+    "db:sync": "node scripts/sync_production_schema.js",
+    "admin:create": "node scripts/create_admin.js",
+    "test:prod-db": "node scripts/test_production_supabase.js",
+    "test:prod-api": "node scripts/verify_production_api.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.x",
+    "adm-zip": "^0.6.0",
     "cors": "^2.x",
     "dotenv": "^17.x",
-    "express": "^5.x"
+    "express": "^5.x",
+    "multer": "^2.3.0",
+    "playwright": "^1.63.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

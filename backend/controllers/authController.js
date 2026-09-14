@@ -1,5 +1,6 @@
 import { supabase, supabaseAdmin } from "../config/supabase.js";
 import { notifyAdmins } from "../services/notificationService.js";
+import { generateRetailerCode } from "../utils/retailerCode.js";
 
 const ALLOWED_SIGNUP_ROLES = ["CUSTOMER", "MANUFACTURER", "RETAILER"];
 const ROLE_PROFILE_TABLES = {
@@ -121,6 +122,7 @@ export const signup = async (req, res) => {
             profileData = {
                 user_id: createdUser.id,
                 shop_name: req.body.shop_name?.trim() || `${full_name.trim()}'s Shop`,
+                retailer_code: generateRetailerCode(),
                 gst_number: req.body.gst_number || null,
                 address: req.body.address || null,
                 postal_code: req.body.postal_code || null,

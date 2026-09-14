@@ -12,6 +12,7 @@ import {
   Gem,
   ExternalLink,
   ChevronRight,
+  FileSpreadsheet,
 } from "lucide-react";
 import StatsCard from "../../components/manufacturer/StatsCard";
 import Navbar from "../../components/manufacturer/Navbar";
@@ -126,6 +127,14 @@ export default function Dashboard() {
                 title="Refresh Data"
               >
                 <RefreshCw className={`w-5 h-5 ${refreshing ? "animate-spin" : ""}`} />
+              </button>
+
+              <button
+                onClick={() => navigate("/manufacturer/products/bulk-import")}
+                className="flex items-center gap-2.5 px-5 py-3 rounded-full bg-[#E3C39D]/40 hover:bg-[#E3C39D]/60 text-black border border-[#A68868]/40 font-black text-xs transition-all duration-300 shadow-xs hover:scale-[1.02] cursor-pointer"
+              >
+                <FileSpreadsheet className="w-5 h-5 text-[#A68868]" />
+                <span>Bulk Import</span>
               </button>
 
               <button

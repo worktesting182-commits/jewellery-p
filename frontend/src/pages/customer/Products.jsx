@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../../services/api";
+import { useRetailer } from "../../context/RetailerContext";
 import ProductCard from "../../components/customer/ProductCard";
 import SearchBar from "../../components/customer/SearchBar";
 import CategoryFilter from "../../components/customer/CategoryFilter";
@@ -8,11 +9,12 @@ import PriceFilter from "../../components/customer/PriceFilter";
 import MaterialFilter from "../../components/customer/MaterialFilter";
 import StockFilter from "../../components/customer/StockFilter";
 import SortDropdown from "../../components/customer/SortDropdown";
-import { Package, Sparkles, Filter, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Package, Sparkles, Filter, X, ChevronLeft, ChevronRight, Store, Lock, PlusCircle } from "lucide-react";
 
 const PRODUCTS_PER_PAGE = 8;
 
 export default function CustomerProducts() {
+  const { activeRetailer, openCodeModal } = useRetailer();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialSearch = searchParams.get("search") || "";
   const initialCategory = searchParams.get("category") || "ALL";
@@ -42,9 +44,11 @@ export default function CustomerProducts() {
     fetchCategories();
 
     window.addEventListener("productsUpdated", fetchProducts);
+    window.addEventListener("activeRetailerChanged", fetchProducts);
     window.addEventListener("focus", fetchProducts);
     return () => {
       window.removeEventListener("productsUpdated", fetchProducts);
+      window.removeEventListener("activeRetailerChanged", fetchProducts);
       window.removeEventListener("focus", fetchProducts);
     };
   }, []);
@@ -326,8 +330,29 @@ export default function CustomerProducts() {
             <SortDropdown value={sortBy} onChange={setSortBy} />
           </div>
 
-          {/* Error Alert View */}
-          {error ? (
+          {/* Active Store Validation & Product Grid */}
+          {!activeRetailer ? (
+            <div className="text-center py-16 px-6 rounded-3xl bg-white border border-[#CDD5DB] space-y-5 shadow-xs">
+              <div className="w-16 h-16 rounded-2xl bg-[#E3C39D]/30 border border-[#A68868]/30 flex items-center justify-center mx-auto text-[#A68868]">
+                <Store className="w-8 h-8" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-black text-black">No Jeweller Store Selected</h3>
+                <p className="text-xs font-bold text-black/70 max-w-md mx-auto">
+                  Please enter your jeweller's access code to unlock and browse their exclusive product catalog.
+                </p>
+              </div>
+              <div>
+                <button
+                  onClick={openCodeModal}
+                  className="px-6 py-3.5 rounded-full bg-[#A68868] hover:bg-[#8A6D4F] text-white text-xs font-black tracking-wide shadow-md transition-all inline-flex items-center gap-2"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>Enter Store Code</span>
+                </button>
+              </div>
+            </div>
+          ) : error ? (
             <div className="text-center py-16 px-6 rounded-3xl bg-rose-50 border border-rose-200 space-y-4">
               <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
                 <X className="w-6 h-6" />

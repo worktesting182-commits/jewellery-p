@@ -6,12 +6,14 @@ import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
+import productImportRoutes from "./routes/productImportRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import retailerRoutes from "./routes/retailerRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import goldSipRoutes from "./routes/goldSipRoutes.js";
+import retailerAccessRoutes from "./routes/retailerAccessRoutes.js";
 import { notFoundHandler, globalErrorHandler } from "./middleware/errorHandler.js";
 
 dotenv.config();
@@ -39,6 +41,8 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/products/bulk", productImportRoutes);
+app.use("/api/manufacturer/products/bulk", productImportRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/customer/products", productRoutes);
 app.use("/api/marketplace/products", productRoutes);
@@ -57,6 +61,15 @@ app.use("/api/customer/gold-wallet", goldSipRoutes);
 app.use("/api/customer/gold-transactions", goldSipRoutes);
 app.use("/api/gold/price", goldSipRoutes);
 app.use("/api/gold/prices", goldSipRoutes);
+
+import retailerScopedRoutes from "./routes/retailerScopedRoutes.js";
+
+// Register Multi-Tenant Retailer Access Module Routes
+app.use("/api/retailer-access", retailerAccessRoutes);
+app.use("/api/customer/stores", retailerAccessRoutes);
+app.use("/api/customer/retailers", retailerAccessRoutes);
+app.use("/api/retailers/:retailerId", retailerScopedRoutes);
+
 
 // Register centralized 404 & 500 error middlewares
 app.use(notFoundHandler);

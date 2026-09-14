@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import NotificationBell from "../components/common/NotificationBell";
+import StoreSwitcher from "../components/customer/StoreSwitcher";
+import RetailerCodeModal from "../components/customer/RetailerCodeModal";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   Gem,
@@ -171,6 +173,7 @@ export default function CustomerLayout() {
 
             {/* User Profile & Actions */}
             <div className="hidden sm:flex items-center gap-3">
+              <StoreSwitcher />
               <NotificationBell />
 
               <Link
@@ -365,6 +368,7 @@ export default function CustomerLayout() {
 
         </div>
       </footer>
+      <RetailerCodeModal />
     </div>
   );
 }

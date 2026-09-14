@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Package,
   PlusCircle,
+  FileSpreadsheet,
   LogOut,
   User,
   Sparkles,
@@ -30,6 +31,7 @@ export default function Navbar({ user }) {
     { name: "Dashboard", href: "/manufacturer/dashboard", icon: LayoutDashboard },
     { name: "Products", href: "/manufacturer/products", icon: Package },
     { name: "Add Product", href: "/manufacturer/products/add", icon: PlusCircle },
+    { name: "Bulk Import", href: "/manufacturer/products/bulk-import", icon: FileSpreadsheet },
     { name: "Fulfillment Orders", href: "/manufacturer/orders", icon: Sparkles },
   ];
 

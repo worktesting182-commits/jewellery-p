@@ -36,6 +36,8 @@ const ManufacturerDashboard = lazy(() => import("./pages/manufacturer/Dashboard"
 const Products = lazy(() => import("./pages/manufacturer/Products"));
 const AddProduct = lazy(() => import("./pages/manufacturer/AddProduct"));
 const EditProduct = lazy(() => import("./pages/manufacturer/EditProduct"));
+const BulkImport = lazy(() => import("./pages/manufacturer/BulkImport"));
+const ImportHistory = lazy(() => import("./pages/manufacturer/ImportHistory"));
 const Profile = lazy(() => import("./pages/manufacturer/Profile"));
 const ManufacturerOrders = lazy(() => import("./pages/manufacturer/Orders"));
 
@@ -181,6 +183,22 @@ function App() {
         element={
           <ProtectedRoute allowedRole="MANUFACTURER">
             <Products />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/manufacturer/products/bulk-import"
+        element={
+          <ProtectedRoute allowedRole="MANUFACTURER">
+            <BulkImport />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/manufacturer/products/imports"
+        element={
+          <ProtectedRoute allowedRole="MANUFACTURER">
+            <ImportHistory />
           </ProtectedRoute>
         }
       />

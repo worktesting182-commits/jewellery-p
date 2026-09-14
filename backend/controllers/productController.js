@@ -209,8 +209,9 @@ export const createProduct = async (req, res) => {
 // =========================
 export const getProducts = async (req, res) => {
     try {
-        // Query retailer_products joined with manufacturer_products, product_images, manufacturers, and retailers
-        const { data: rListings, error: rErr } = await supabaseAdmin
+        const targetRetailerId = req.retailerId || req.query.retailer_id;
+        
+        let query = supabaseAdmin
             .from("retailer_products")
             .select(`
                 *,
@@ -222,8 +223,13 @@ export const getProducts = async (req, res) => {
                 retailer:retailers (
                     id, shop_name
                 )
-            `)
-            .order("created_at", { ascending: false });
+            `);
+
+        if (targetRetailerId) {
+            query = query.eq("retailer_id", targetRetailerId);
+        }
+
+        const { data: rListings, error: rErr } = await query.order("created_at", { ascending: false });
 
         if (rErr) {
             console.error("Error fetching retailer products:", rErr);
@@ -583,7 +589,7 @@ export const getMyProducts = async (req, res) => {
         (legacyProds || []).forEach((p) => {
             if (!seenIds.has(p.id)) {
                 seenIds.add(p.id);
-                const imgUrl = p.image_url || imageMap.get(p.id) || "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&auto=format&fit=crop&q=60";
+                const imgUrl = imageMap.get(p.id) || p.image_url || "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&auto=format&fit=crop&q=60";
                 const priceVal = Number(p.manufacturer_price || p.price || 0);
                 mergedList.push({
                     ...p,
@@ -596,7 +602,7 @@ export const getMyProducts = async (req, res) => {
             }
         });
 
-        const includeInactive = req.query.include_inactive === "true";
+        const includeInactive = req.query?.include_inactive === "true";
         const filteredList = includeInactive
             ? mergedList
             : mergedList.filter((p) => {

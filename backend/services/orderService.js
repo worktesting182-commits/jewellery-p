@@ -10,25 +10,33 @@ const inMemoryOrders = new Map();
  * Service: Create Order (Single Logical Operation Flow)
  * Flow: Validate Cart -> Validate Stock -> Create Order -> Create Order Items -> Reduce Product Stock -> Clear Cart -> Return Order Details
  */
-export const createOrder = async (userId, orderPayload) => {
+export const createOrder = async (userId, orderPayload, retailerId, customerId) => {
   const { shipping_address, shippingAddress, payment_method, paymentMethod } = orderPayload || {};
   const addressStr = shipping_address || shippingAddress || "Default Customer Address";
   const payMethod = payment_method || paymentMethod || "Simulated Online Payment";
 
-  // Step 1: Validate Cart
-  let cartItems = orderPayload?.items;
-  if (!Array.isArray(cartItems) || cartItems.length === 0) {
-    const cartResult = await cartService.getCart(userId);
-    cartItems = cartResult.cart?.items || [];
-  }
+  const targetRetailerId = retailerId || orderPayload?.retailer_id || orderPayload?.retailerId;
 
-  if (!cartItems || cartItems.length === 0) {
-    const error = new Error("Cart is empty");
+  if (!targetRetailerId) {
+    const error = new Error("Retailer context (x-retailer-id) is required to place an order.");
     error.statusCode = 400;
     throw error;
   }
 
-  // Step 2: Validate Stock, Availability & Discontinued status for all cart items
+  // Step 1: Validate Cart
+  let cartItems = orderPayload?.items;
+  if (!Array.isArray(cartItems) || cartItems.length === 0) {
+    const cartResult = await cartService.getCart(userId, targetRetailerId, customerId);
+    cartItems = cartResult.cart?.items || [];
+  }
+
+  if (!cartItems || cartItems.length === 0) {
+    const error = new Error("Cart is empty for this retailer storefront.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // Step 2: Validate Single-Retailer Invariant, Stock, Availability & Discontinued status
   const validatedProducts = [];
   for (const item of cartItems) {
     const productId = item.product_id || item.productId || item.id;
@@ -40,10 +48,20 @@ export const createOrder = async (userId, orderPayload) => {
         id: productId || `prod_${Date.now()}`,
         name: productName,
         price: Number(item.price || item.unitPrice || item.selling_price || 0),
+        retailer_id: targetRetailerId,
         stock: 999,
         is_active: true,
         status: "ACTIVE",
       };
+    }
+
+    // SINGLE-RETAILER ORDER INVARIANT CHECK:
+    // Cart Retailer == Order Retailer == Product Listing Retailer
+    const prodRetailerId = product.retailer_id || item.retailer_id;
+    if (prodRetailerId && prodRetailerId !== targetRetailerId) {
+      const error = new Error(`Order placement rejected: Product "${productName}" belongs to a different retailer. Orders must strictly contain items from one retailer.`);
+      error.statusCode = 409;
+      throw error;
     }
 
 
@@ -159,6 +177,7 @@ export const createOrder = async (userId, orderPayload) => {
     if (customerId) {
       const dbOrderPayload = {
         customer_id: customerId,
+        retailer_id: targetRetailerId,
         total_amount: totalAmount,
         order_status: "PENDING",
         payment_status: payMethod === "Cash on Delivery" || payMethod === "COD" ? "PENDING" : "PAID",

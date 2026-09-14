@@ -17,10 +17,25 @@ api.interceptors.request.use(async (config) => {
 
     if (session?.access_token) {
         config.headers.Authorization = `Bearer ${session.access_token}`;
+        localStorage.setItem("token", session.access_token);
+    }
+
+    const activeRetailerId = localStorage.getItem("active_retailer_id");
+    if (activeRetailerId) {
+        config.headers["x-retailer-id"] = activeRetailerId;
     }
 
     return config;
 });
+
+export const retailerAccessAPI = {
+    validateCode: (code) => api.post("/retailer-access/validate-code", { code }),
+    joinStore: (codeOrId) => api.post("/retailer-access/join", { code: codeOrId }),
+    getMyStores: () => api.get("/customer/retailers"),
+    getMembership: (retailerId) => api.get(`/retailer-access/membership/${retailerId}`),
+    leaveStore: (retailerId) => api.delete(`/customer/retailers/${retailerId}`),
+};
+
 
 export const authAPI = {
     signup: (userData) => api.post("/auth/signup", userData),

@@ -1,6 +1,7 @@
 import { supabaseAdmin } from "../config/supabase.js";
 import { normalizeProduct } from "../utils/productModel.js";
 import { getLatestBenchmarkRates } from "../utils/pricingEngine.js";
+import { generateRetailerCode } from "../utils/retailerCode.js";
 
 // Helper to resolve or auto-create retailer profile for logged-in user
 async function resolveRetailerProfile(user) {
@@ -16,6 +17,7 @@ async function resolveRetailerProfile(user) {
       .insert({
         user_id: user.id,
         shop_name: user.full_name || "Aura Artisan Jewellers",
+        retailer_code: generateRetailerCode(),
         description: "Curated fine jewellery retailer store.",
         is_verified: true,
       })

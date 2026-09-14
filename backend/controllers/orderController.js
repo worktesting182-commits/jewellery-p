@@ -7,9 +7,11 @@ import * as orderService from "../services/orderService.js";
 export const createOrder = async (req, res) => {
   try {
     const userId = req.user.id;
+    const retailerId = req.retailerId;
+    const customerId = req.customer?.id;
     const orderPayload = req.body || {};
 
-    const result = await orderService.createOrder(userId, orderPayload);
+    const result = await orderService.createOrder(userId, orderPayload, retailerId, customerId);
 
     return res.status(201).json({
       success: true,

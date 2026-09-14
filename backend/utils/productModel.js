@@ -51,10 +51,10 @@ export function normalizeProduct(rawRecord, liveRates = null) {
   const status = (rawRecord.status || "ACTIVE").toUpperCase();
   const isVisibleToCustomer = status === "ACTIVE";
 
-  const imgUrl =
-    rawRecord.image_url ||
-    rawRecord.image ||
-    "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=600";
+  let imgUrl = rawRecord.image_url || rawRecord.image;
+  if (!imgUrl || typeof imgUrl !== "string" || imgUrl.includes("placeholder.cjp.store")) {
+    imgUrl = "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=600";
+  }
 
   // Preserve raw manufacturer wholesale price separately from dynamic selling price
   const rawManufacturerPrice = rawRecord.manufacturer_price != null

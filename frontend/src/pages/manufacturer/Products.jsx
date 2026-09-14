@@ -401,6 +401,18 @@ export default function Products() {
         .eq("manufacturer_id", mfg.id)
         .order("created_at", { ascending: false });
 
+      // Fetch images for fallback mapping
+      const { data: imgList } = await supabase.from("product_images").select("*");
+      const imgMap = new Map();
+      (imgList || []).forEach((img) => {
+        if (img.manufacturer_product_id && !imgMap.has(img.manufacturer_product_id)) {
+          imgMap.set(img.manufacturer_product_id, img.image_url);
+        }
+        if (img.product_id && !imgMap.has(img.product_id)) {
+          imgMap.set(img.product_id, img.image_url);
+        }
+      });
+
       if (prodErr) {
         // Try fallback table manufacturer_products
         const { data: legacyProds } = await supabase
@@ -409,9 +421,19 @@ export default function Products() {
           .eq("manufacturer_id", mfg.id)
           .order("created_at", { ascending: false });
 
-        setProducts(Array.isArray(legacyProds) ? legacyProds : []);
+        const mapped = (legacyProds || []).map((p) => ({
+          ...p,
+          image_url: imgMap.get(p.id) || p.image_url,
+          image: imgMap.get(p.id) || p.image_url,
+        }));
+        setProducts(mapped);
       } else {
-        setProducts(Array.isArray(prods) ? prods : []);
+        const mapped = (prods || []).map((p) => ({
+          ...p,
+          image_url: p.image_url || imgMap.get(p.id),
+          image: p.image_url || imgMap.get(p.id),
+        }));
+        setProducts(mapped);
       }
     } catch (err) {
       console.error("Fetch products error:", err);
@@ -523,13 +545,22 @@ export default function Products() {
                 {activeProductCount !== 1 ? "s" : ""} total
               </p>
             </div>
-            <button
-              onClick={() => navigate("/manufacturer/products/add")}
-              className="px-5 py-2.5 rounded-full bg-[#A68868] text-white text-xs font-black hover:bg-[#8A6D4F] transition-all flex items-center justify-center gap-2 self-start sm:self-auto shadow-md active:scale-95 cursor-pointer"
-            >
-              <Plus className="w-4 h-4 text-white" />
-              Add Product
-            </button>
+            <div className="flex items-center gap-3 self-start sm:self-auto">
+              <button
+                onClick={() => navigate("/manufacturer/products/bulk-import")}
+                className="px-4 py-2.5 rounded-full bg-amber-50 text-amber-950 border border-amber-300 text-xs font-black hover:bg-amber-100 transition-all flex items-center justify-center gap-2 shadow-xs active:scale-95 cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 text-amber-800" />
+                Bulk Import
+              </button>
+              <button
+                onClick={() => navigate("/manufacturer/products/add")}
+                className="px-5 py-2.5 rounded-full bg-[#A68868] text-white text-xs font-black hover:bg-[#8A6D4F] transition-all flex items-center justify-center gap-2 shadow-md active:scale-95 cursor-pointer"
+              >
+                <Plus className="w-4 h-4 text-white" />
+                Add Product
+              </button>
+            </div>
           </div>
 
           {/* Filters Bar */}

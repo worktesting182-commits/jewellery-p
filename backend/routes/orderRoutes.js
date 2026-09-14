@@ -1,6 +1,7 @@
 import express from "express";
 import { createOrder, getOrders, getOrderById, cancelOrder, updateOrderStatus, getManufacturerOrders } from "../controllers/orderController.js";
 import { authenticate } from "../middleware/authMiddleware.js";
+import { verifyRetailerAccess } from "../middleware/verifyRetailerAccess.js";
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router.get("/orders", getManufacturerOrders); // Support mounting under /api/man
 router.put("/orders/:id", updateOrderStatus); // Support mounting under /api/manufacturer
 
 // Customer order routes
-router.post("/", createOrder);
+router.post("/", verifyRetailerAccess, createOrder);
 router.get("/", getOrders);
 router.get("/:id", getOrderById);
 router.put("/:id/cancel", cancelOrder);

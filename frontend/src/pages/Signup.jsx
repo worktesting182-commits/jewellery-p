@@ -137,9 +137,11 @@ export default function Signup() {
         });
         if (err) throw err;
       } else if (role === "RETAILER") {
+        const generatedCode = `CJP-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
         const { error: err } = await supabase.from("retailers").insert({
           user_id: userId,
           shop_name: shopName.trim() || `${fullName.trim()}'s Shop`,
+          retailer_code: generatedCode,
         });
         if (err) throw err;
       }

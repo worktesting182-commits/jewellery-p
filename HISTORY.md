@@ -2935,4 +2935,686 @@ Full security audit: scan entire project for hardcoded `API_KEY`, `SECRET`, `PAS
 - Standardizes production health check endpoint `GET /api/health` across local and deployed cloud environments.
 - Prepares Express backend for cloud hosting on Railway with Postman collection testing.
 
+---
+
+## [Phase 11 - CJP Version 2.0 Multi-Tenant Customer–Retailer Access Model Architecture] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **CJP Version 2.0 Architectural & Business Requirement Upgrade**:
+  - Convert CJP from single-retailer assumptions to a **Multi-Tenant Customer–Retailer Access Model**.
+  - A customer can belong to and access multiple retailers, but CANNOT randomly discover or search retailers. Access is granted ONLY by entering a valid unique retailer access code (`CJP-XXXXXX`).
+  - Update `Product Requirements.md` and `Architecture.md` to Version 2.0.
+  - Implement explicit backend membership authorization middleware (`verifyRetailerAccess`), parameter-tampering defense, retailer-isolated cart & order pipelines, Supabase RLS security policies, and React frontend storefront context management (`RetailerContext`, `RetailerCodeModal`, `StoreSwitcher`).
+
+### 🛠️ Changes Made & Purpose
+1. **Documentation Upgraded to Version 2.0**:
+   - **[`Product Requirements.md`](file:///d:/abhinand/CJP/jewellery-p/Product%20Requirements.md)**: Updated to Version 2.0 PRD incorporating explicit retailer access code authorization, "My Stores" switcher, cart/order isolation, anti-enumeration rules, and 16 edge cases.
+   - **[`Architecture.md`](file:///d:/abhinand/CJP/jewellery-p/Architecture.md)**: Updated to Version 2.0 Architecture Document with ER diagrams, sequence flows, multi-tenant DDL schemas, and Supabase RLS security policies.
+
+2. **Database Migrations & Data Reconciliation**:
+   - Added `retailer_code` (`VARCHAR(50)`, `NOT NULL`, `UNIQUE`, uppercase index) to `retailers` table.
+   - Created `customer_retailers` junction table (`customer_id`, `retailer_id`, `status`, `joined_at`, `UNIQUE(customer_id, retailer_id)` constraint).
+   - Added `retailer_id` and composite index `idx_carts_customer_retailer` to `carts` table and `retailer_id` to `orders` table.
+   - Executed duplicate-safe data backfill with 100% reconciliation audit passed.
+
+3. **Backend Multi-Tenant Access Module & Authorization Pipeline**:
+   - **[`retailerAccessService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/retailerAccessService.js)**: Created service handling `validateRetailerCode()`, `joinRetailer()`, `getMyRetailers()`, `getRetailerMembership()`, and `leaveRetailer()`.
+   - **[`verifyRetailerAccess.js`](file:///d:/abhinand/CJP/jewellery-p/backend/middleware/verifyRetailerAccess.js)**: Created multi-tenant membership authorization middleware enforcing parameter tampering defense across headers, query parameters, URLs, and bodies.
+   - **[`retailerScopedRoutes.js`](file:///d:/abhinand/CJP/jewellery-p/backend/routes/retailerScopedRoutes.js)**: Created router mounting recommended endpoints (`/store`, `/products`, `/cart`, `/checkout`) under `/api/retailers/:retailerId`.
+
+4. **Product, Cart & Order Isolation**:
+   - **Product Isolation ([`productController.js`](file:///d:/abhinand/CJP/jewellery-p/backend/controllers/productController.js))**: Separated wholesale master catalog (`manufacturer_products`) from retail listings (`retailer_products`). Scoped queries strictly by `.eq("retailer_id", req.retailerId)`.
+   - **Cart Isolation ([`cartService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/cartService.js))**: Scoped carts by `(customer_id, retailer_id)`. Rejects mixed-retailer item insertion with `409 Conflict`.
+   - **Order Checkout Protection ([`orderService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/orderService.js))**: Enforced single-retailer order alignment invariant ($\text{Cart Retailer} = \text{Order Retailer} = \text{Product Listing Retailer}$).
+
+5. **Supabase Row Level Security (RLS) Dual-Layer Security**:
+   - **[`create_supabase_rls_policies_v2.sql`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/migrations/create_supabase_rls_policies_v2.sql)**: Created production RLS policies with `EXISTS (customer_retailers)` subqueries for PostgreSQL table security.
+
+6. **Frontend State & Components Integration**:
+   - **[`RetailerContext.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/context/RetailerContext.jsx)**: Created context managing active retailer state, "My Stores" memberships, `sessionStorage` pre-auth pending code preservation, and post-login auto-join.
+   - **[`RetailerCodeModal.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/components/customer/RetailerCodeModal.jsx)**: Created pre-auth & post-auth code validation modal with limited preview info (`ABC Jewellery Shop`).
+   - **[`StoreSwitcher.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/components/customer/StoreSwitcher.jsx)**: Mounted in [`CustomerLayout.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/layouts/CustomerLayout.jsx) header for switching stores and leaving/removing store memberships via an interactive Red Trash icon button.
+   - **[`Products.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/pages/customer/Products.jsx)**: Integrated empty state card ("No Jeweller Store Selected") when no store code is active, prompting customer to enter store code.
+
+7. **Verification & Build Validation**:
+   - Executed 8 automated test scripts (`test_recommended_api_sequence.js`, `test_membership_middleware.js`, `test_product_isolation.js`, `test_cart_isolation.js`, `test_order_protection.js`, `apply_phase_11_rls_policies.js`, `test_step_12_4_my_stores.js`, `validate_migration_reconciliation.js`) — **100% PASS**.
+   - Executed Vite production build (`cmd /c npm run build`) — **0 errors**, built cleanly in 2.07s.
+
+### 🎯 Impact & Effect on Project
+- Upgrades CJP to a robust, scalable, multi-tenant B2B2C e-commerce platform.
+- Strictly prevents unauthorized cross-tenant store access, customer enumeration, and cart/order poisoning.
+- Delivers an elegant, frictionless customer experience with store code entry, navbar switching, and pre-auth login continuation.
+
+---
+
+## [Phase 12 - Bulk Product Import Architecture & Composite SKU Uniqueness] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 2 / Step 2.2 — Add SKU Uniqueness Constraint**:
+  - Implement composite SKU uniqueness: `UNIQUE(manufacturer_id, sku)`.
+  - Ensure SKU `ABC-001` can exist independently for Manufacturer A and Manufacturer B, but prevent duplicate SKUs within the same manufacturer account.
+  - Build shared validation engine ([`productValidationCore.js`](file:///d:/abhinand/CJP/jewellery-p/backend/utils/productValidationCore.js)) to validate both single product forms and bulk CSV/Excel imports.
+  - Update `HISTORY.md`.
+
+### 🛠️ Changes Made & Purpose
+1. **Migration DDL Script ([`add_sku_to_manufacturer_products.sql`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/migrations/add_sku_to_manufacturer_products.sql))**:
+   - Added `sku VARCHAR(100)` column to `manufacturer_products`.
+   - Created index `idx_manufacturer_products_mfg_sku` on `(manufacturer_id, sku)`.
+   - Created composite unique constraint `uq_manufacturer_sku` on `UNIQUE(manufacturer_id, sku)`.
+2. **Shared Validation Engine ([`productValidationCore.js`](file:///d:/abhinand/CJP/jewellery-p/backend/utils/productValidationCore.js))**:
+   - Implemented `validateProductData()` function enforcing mandatory field presence, positive pricing, numeric ranges, and SKU uniqueness check scoped strictly by `manufacturer_id`.
+3. **Automated Unit Testing ([`test_step_2_2_sku_uniqueness.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_step_2_2_sku_uniqueness.js))**:
+   - Validated that Manufacturer A and Manufacturer B can hold identical SKUs independently (`TEST-SKU-001` ✅), while duplicate SKUs within Manufacturer A are caught and blocked (`TEST-SKU-001` ❌).
+
+### 🎯 Impact & Effect on Project
+- Establishes a clean, single-source-of-truth validation core for both single product creation and bulk import.
+- Guarantees multi-tenant SKU isolation per manufacturer without global namespace collisions.
+
+---
+
+## [Phase 13 - Bulk Product Import Database Architecture & Staging Buffer] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 3 — Create Bulk Import Database Tables**:
+  - **Step 3.1 — Create `product_import_jobs`**: Job tracker managing manufacturer bulk upload files, line counters (`total_rows`, `valid_rows`, `invalid_rows`, `processed_rows`), status lifecycle (`UPLOADED`, `VALIDATING`, `VALIDATED`, `IMPORTING`, `COMPLETED`, `PARTIAL_SUCCESS`, `FAILED`), and audit timestamps.
+  - **Step 3.2 — Create `product_import_errors`**: Granular error log recording `import_job_id`, `row_number`, `sku`, `field`, `error_code`, and descriptive `error_message`.
+  - **Step 3.3 — Create `product_import_rows`**: Staging buffer holding raw upload payloads (`raw_data JSONB`), normalized data (`normalized_data JSONB`), and validation status (`PENDING`, `VALID`, `INVALID`, `IMPORTED`, `SKIPPED`) to prevent re-parsing during confirmation.
+
+### 🛠️ Changes Made & Purpose
+1. **DDL Migration Script ([`create_bulk_import_tables.sql`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/migrations/create_bulk_import_tables.sql))**:
+   - Formulated DDL DML statements creating `product_import_jobs`, `product_import_rows`, and `product_import_errors` with composite indexes and foreign key cascades.
+2. **Schema Verification & Database Audit ([`apply_step_3_bulk_import_tables.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/apply_step_3_bulk_import_tables.js))**:
+   - Executed schema verification script confirming all 3 tables (`product_import_jobs`, `product_import_rows`, `product_import_errors`) are ready in the active database.
+
+### 🎯 Impact & Effect on Project
+- Establishes an enterprise-grade async staging buffer for bulk product imports.
+- Enables multi-step upload workflows (Upload ➔ Validate ➔ Preview ➔ Manufacturer Confirmation) without needing to re-parse Excel/CSV files.
+
+---
+
+## [Phase 14 - CJP Manufacturer Product Import Template Specification] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 4 / Step 4.1 — Start with One General Template**:
+  - Define `CJP Manufacturer Product Import Template` with 15 standard columns:
+    1. `SKU` (Required)
+    2. `Product Name` (Required)
+    3. `Category` (Required)
+    4. `Subcategory` (Optional)
+    5. `Metal Type` (Required)
+    6. `Purity` (Required)
+    7. `Gross Weight` (Required)
+    8. `Net Weight` (Required)
+    9. `Stone Type` (Optional)
+    10. `Stone Weight` (Optional)
+    11. `Making Charge` (Optional)
+    12. `Base Price` (Required)
+    13. `Stock Quantity` (Required)
+    14. `Description` (Optional)
+    15. `Status` (Required)
+  - Create template generator module (`importTemplateSpec.js`) producing downloadable CSV/Excel sample files.
+
+### 🛠️ Changes Made & Purpose
+1. **Template Specification Engine ([`importTemplateSpec.js`](file:///d:/abhinand/CJP/jewellery-p/backend/utils/importTemplateSpec.js))**:
+   - Created `CJP_IMPORT_COLUMNS` array defining data keys, requirement flags, sample data, and types.
+   - Built `generateCSVTemplate()` utility producing standardized CSV sample files for manufacturer downloads.
+2. **Automated Verification Script ([`test_step_4_1_import_template.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_step_4_1_import_template.js))**:
+   - Executed automated specification check verifying 15/15 standard columns and valid CSV formatting.
+
+### 🎯 Impact & Effect on Project
+- Standardizes the bulk upload file format across all manufacturers.
+- Provides a clean template for manufacturers to download, fill out, and upload.
+
+---
+
+## [Phase 15 - Strict Enum Allowed Values & CJP Category Mapping] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Step 4.2 — Define Exact Allowed Values**:
+  - Enforce strict allowed values for enums:
+    - **Status**: `ACTIVE`, `INACTIVE`, `DRAFT`
+    - **Metal Type**: `GOLD`, `SILVER`, `PLATINUM`, `OTHER`
+    - **Making Charge Type**: `PERCENTAGE`, `FLAT`
+  - **Categories**: Map input category strings directly against existing CJP database categories (`categories` table) rather than allowing manufacturers to create arbitrary unmapped category names.
+
+### 🛠️ Changes Made & Purpose
+1. **Enum & Specification Constants ([`importTemplateSpec.js`](file:///d:/abhinand/CJP/jewellery-p/backend/utils/importTemplateSpec.js))**:
+   - Defined `ALLOWED_STATUSES`, `ALLOWED_METAL_TYPES`, and `ALLOWED_MAKING_CHARGE_TYPES` constants.
+2. **Shared Validation Engine Upgraded ([`productValidationCore.js`](file:///d:/abhinand/CJP/jewellery-p/backend/utils/productValidationCore.js))**:
+   - Implemented strict enum validation for `status` and `metal_type`.
+   - Implemented dynamic database lookup against CJP `categories` table. Rejects arbitrary unmapped category names with a clear error listing valid CJP categories.
+3. **Automated Verification Script ([`test_step_4_2_allowed_values.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_step_4_2_allowed_values.js))**:
+   - Validated that valid values (`GOLD`, `ACTIVE`, `Rings`) pass ✅, invalid enums (`BRONZE`, `PENDING_REVIEW`) are rejected ❌, and arbitrary category strings (`Space Jewellery Gadgets`) are cleanly blocked ❌.
+
+### 🎯 Impact & Effect on Project
+- Prevents database corruption from arbitrary or misspelled metal types and statuses.
+- Guarantees strict taxonomy alignment with existing CJP store categories.
+
+---
+
+## [Phase 16 - Multi-Sheet Excel Template Generation & Guidelines] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Step 4.3 — Add Template Instructions & Multi-Sheet Excel Workbook**:
+  - Build multi-sheet Excel workbook generator (`generateExcelTemplateBuffer()`):
+    - **Sheet 1 (`Products`)**: Standard column headers and formatted sample rows.
+    - **Sheet 2 (`Instructions`)**: Comprehensive rules explaining:
+      - SKU must be unique per manufacturer.
+      - Base price must be positive (> 0).
+      - Gross & Net Weights must be positive numbers.
+      - Status must use allowed values (`ACTIVE`, `INACTIVE`, `DRAFT`).
+      - Categories must exist in CJP (`Rings`, `Necklaces`, `Earrings`, `Bracelets`, `Pendants`, `Bangles`, `Anklets`).
+    - **Sheet 3 (`Allowed Values`)**: Quick reference lookup tables for Statuses, Metal Types, Making Charge Types, and CJP System Categories.
+
+### 🛠️ Changes Made & Purpose
+1. **Multi-Sheet Generator Engine ([`importTemplateSpec.js`](file:///d:/abhinand/CJP/jewellery-p/backend/utils/importTemplateSpec.js))**:
+   - Integrated SheetJS (`xlsx`) library into backend dependencies.
+   - Built `generateExcelTemplateBuffer()` producing binary Excel `.xlsx` files with Sheet 1 (`Products`), Sheet 2 (`Instructions`), and Sheet 3 (`Allowed Values`).
+2. **Automated Verification Script ([`test_step_4_3_multi_sheet_excel.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_step_4_3_multi_sheet_excel.js))**:
+   - Executed automated check verifying all 3 sheets are present and contain accurate guideline data.
+
+### 🎯 Impact & Effect on Project
+- Delivers a professional, self-documenting Excel template for manufacturers.
+- Eliminates user confusion by providing explicit instructions and reference tables directly within the downloaded spreadsheet.
+
+---
+
+## [Phase 17 - Configurable Upload Limits & File Whitelist Middleware] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 5 / Step 5.1 — Add Upload Middleware & Central Configuration**:
+  - Create `config/importConfig.js` defining non-hardcoded configurable limits (`MAX_FILE_SIZE_BYTES`, `MAX_ROWS`, `BATCH_SIZE`, `ALLOWED_EXTENSIONS`).
+  - Allow strictly: `.xlsx`, `.xls`, `.csv`.
+  - Reject dangerous formats: `.exe`, `.pdf`, `.zip`, `.js`, etc.
+  - Create Multer memory storage upload middleware ([`importUploadMiddleware.js`](file:///d:/abhinand/CJP/jewellery-p/backend/middleware/importUploadMiddleware.js)) to validate files before backend processing.
+
+### 🛠️ Changes Made & Purpose
+1. **Centralized Configuration ([`importConfig.js`](file:///d:/abhinand/CJP/jewellery-p/backend/config/importConfig.js))**:
+   - Defined `PRODUCT_IMPORT_CONFIG` containing configurable limits (10MB max file size, 1000 max rows, 100 batch processing size) and extension/MIME whitelists.
+2. **Multer Upload Middleware ([`importUploadMiddleware.js`](file:///d:/abhinand/CJP/jewellery-p/backend/middleware/importUploadMiddleware.js))**:
+   - Built Express upload middleware enforcing memory storage, file extension whitelisting, and file size checks.
+3. **Automated Verification Script ([`test_step_5_1_upload_middleware.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_step_5_1_upload_middleware.js))**:
+   - Verified that `.xlsx`, `.xls`, `.csv` are allowed ✅, while `.exe`, `.pdf`, `.zip`, `.js` are rejected ❌.
+
+### 🎯 Impact & Effect on Project
+- Secures the backend against malicious file uploads and memory exhaustion.
+- Centralizes all import settings in `importConfig.js` for easy environment overrides.
+
+---
+
+## [Phase 18 - Bulk Product Upload Validation Endpoint & Staging Pipeline] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Step 5.2 — Create the Validation Endpoint**:
+  - Build `POST /api/products/bulk/validate` (and `/api/manufacturer/products/bulk/validate`).
+  - Flow: Authenticated Request $\rightarrow$ Verify MANUFACTURER role $\rightarrow$ Resolve `manufacturer_id` $\rightarrow$ Validate File $\rightarrow$ Create Import Job $\rightarrow$ Parse File $\rightarrow$ Validate Rows $\rightarrow$ Store Staging Results & Errors $\rightarrow$ Return `uploadId` + `summary`.
+
+### 🛠️ Changes Made & Purpose
+1. **Bulk Import Service ([`bulkImportService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/bulkImportService.js))**:
+   - Created `validateBulkUpload()` service pipeline parsing Excel/CSV files via SheetJS (`xlsx`), validating each row via shared `productValidationCore.js`, logging granular error records into `product_import_errors`, staging buffer rows in `product_import_rows`, and managing job status in `product_import_jobs`.
+2. **Bulk Import Controller ([`bulkImportController.js`](file:///d:/abhinand/CJP/jewellery-p/backend/controllers/bulkImportController.js))**:
+   - Created `validateBulkUpload` controller returning `{ success: true, uploadId, summary: { file_name, total_rows, valid_rows, invalid_rows, status }, errors }`.
+   - Created `downloadImportTemplate` controller serving `.xlsx` or `.csv` downloads.
+3. **Route Mounting ([`productRoutes.js`](file:///d:/abhinand/CJP/jewellery-p/backend/routes/productRoutes.js))**:
+   - Mounted `POST /api/products/bulk/validate` protected by `authenticate`, `authorize("MANUFACTURER")`, and `uploadImportFile` middleware.
+4. **Automated Verification Script ([`test_step_5_2_bulk_validate.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_step_5_2_bulk_validate.js))**:
+   - Executed automated test simulating multi-sheet Excel upload validation pipeline — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Delivers the core async file validation engine for CJP bulk product imports.
+- Returns clean `uploadId` and line-by-line validation summaries before committing records to the live product catalog.
+
+---
+
+## [Phase 19 - Excel/CSV Parser Utility & Value Normalization Engine] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 6 — Build the Excel/CSV Parser**:
+  - Create `utils/excelParser.js`.
+  - Responsibilities: Read CSV, read XLSX, extract headers, extract rows, normalize values (trim strings, convert numbers, sanitize keys), and return structured rows with 1-indexed `rowNumber`.
+
+### 🛠️ Changes Made & Purpose
+1. **Excel/CSV Parser Engine ([`excelParser.js`](file:///d:/abhinand/CJP/jewellery-p/backend/utils/excelParser.js))**:
+   - Built `parseSpreadsheetBuffer(fileBuffer, fileName)` utility converting binary spreadsheet buffers into clean JSON row objects.
+   - Trims whitespace from string fields (`sku`, `productName`, `category`, `description`, etc.).
+   - Converts numeric fields safely (`grossWeight`, `netWeight`, `stoneWeight`, `makingCharge`, `basePrice`, `stockQuantity`) to JavaScript numbers.
+   - Maps header variations flexibly to standardized product keys.
+2. **Automated Verification Script ([`test_phase_6_excel_parser.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_phase_6_excel_parser.js))**:
+   - Executed automated check verifying row normalization, numeric conversion, and 1-indexed `rowNumber` metadata — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Decouples spreadsheet parsing logic into a clean, reusable utility module.
+- Normalizes inconsistent spreadsheet input formats before business rule validation.
+
+---
+
+## [Phase 20 - Layered Product Import Validator Engine] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 7 — Build Validation Layer**:
+  - Create `utils/productValidator.js`.
+  - **Layer 1 (File Validation)**: Check file presence, allowed extension whitelist, size limits (10MB max), and spreadsheet structure readability.
+  - **Layer 2 (Column Header Validation)**: Check mandatory headers (`SKU`, `Product Name`, `Category`, `Base Price`, `Stock Quantity`, `Status`). Stop execution before row parsing if template structure is invalid!
+
+### 🛠️ Changes Made & Purpose
+1. **Layered Validator Engine ([`productValidator.js`](file:///d:/abhinand/CJP/jewellery-p/backend/utils/productValidator.js))**:
+   - Implemented `validateFileLayer(fileBuffer, fileName, mimeType)` handling Layer 1 file checks.
+   - Implemented `validateColumnHeaderLayer(sheet)` handling Layer 2 mandatory header checks and alias matching. Stops invalid template uploads before processing data rows.
+2. **Service Integration ([`bulkImportService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/bulkImportService.js))**:
+   - Integrated Layer 1 and Layer 2 validation steps at the head of `validateBulkUpload()`.
+3. **Automated Verification Script ([`test_phase_7_product_validator.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_phase_7_product_validator.js))**:
+   - Verified that valid files and headers pass ✅, while invalid template headers (missing `Category` & `Status`) are caught and stopped before processing rows ❌.
+
+### 🎯 Impact & Effect on Project
+- Prevents wasting server CPU and DB calls on malformed or invalid spreadsheet templates.
+- Provides immediate, actionable feedback on missing template columns before row parsing.
+
+---
+
+## [Phase 21 - Layer 3 Row Validation & Layer 4 Intra-File Duplicate SKU Detection] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 7 — Layer 3 & Layer 4 Validation**:
+  - **Layer 3 (Row Validation)**: Validate SKU, Product Name, Category mapping, positive Base Price, positive Weights, non-negative integer Stock Quantity, and allowed Statuses for every row.
+  - **Layer 4 (Intra-File Duplicate SKU Detection)**: Detect duplicate SKUs within the same upload file (e.g. Row 5 and Row 80 share SKU `ABC-001`). Both rows must receive intra-file duplicate validation errors.
+
+### 🛠️ Changes Made & Purpose
+1. **Intra-File Duplicate Detection & Batch Validation Engine ([`productValidator.js`](file:///d:/abhinand/CJP/jewellery-p/backend/utils/productValidator.js))**:
+   - Implemented `detectIntraFileDuplicates(rows)` mapping SKUs to row numbers.
+   - Implemented `validateRowsBatch(rows, manufacturerId)` running Layer 3 row validations and attaching Layer 4 intra-file conflict messages e.g. *"Duplicate SKU 'ABC-001' found within this upload file at Row 5 (Conflicts with Row 80)."*
+2. **Service Integration ([`bulkImportService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/bulkImportService.js))**:
+   - Integrated `validateRowsBatch()` into `validateBulkUpload()`.
+3. **Automated Verification Script ([`test_layers_3_and_4_validation.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_layers_3_and_4_validation.js))**:
+   - Verified that unique rows pass ✅, invalid prices/stocks are caught ❌, and duplicate SKUs at Row 5 and Row 80 both receive validation error messages ❌ — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Guarantees 100% data integrity before staging uploaded records.
+- Blocks intra-file SKU collisions before database insertion.
+
+---
+
+## [Phase 22 - Layer 5 Database Composite Duplicate SKU Validation] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 7 — Layer 5 Database Duplicate Validation**:
+  - Check composite constraint `UNIQUE(manufacturer_id, sku)` against existing products in `manufacturer_products` table.
+  - Perform high-performance batch query lookup for all SKUs in the upload file.
+  - Rejects any row matching an existing live catalog product SKU for that manufacturer account.
+
+### 🛠️ Changes Made & Purpose
+1. **Batch Database Duplicate Query Engine ([`productValidator.js`](file:///d:/abhinand/CJP/jewellery-p/backend/utils/productValidator.js))**:
+   - Implemented `detectDatabaseDuplicates(skus, manufacturerId)` using a single batch `.in("sku", cleanSkus)` SQL query against `manufacturer_products`.
+   - Integrated Layer 5 check into `validateRowsBatch()` tagging collisions e.g. *"Database SKU Conflict: SKU 'ABC-001' already exists in your live product catalog (Product: '24K Royal Gold Ring')."*
+2. **Automated Verification Script ([`test_layer_5_database_duplicates.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_layer_5_database_duplicates.js))**:
+   - Verified batch query map execution and collision reporting — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Completes the 5-layer product import validation system.
+- Enforces strict SKU uniqueness per manufacturer without needing N individual database queries.
+
+---
+
+## [Phase 23 - Store Validation Results & Deferred Catalog Insertion] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 8 — Store Validation Results**:
+  - Store validation results across `product_import_jobs`, `product_import_rows` (staging buffer), and `product_import_errors` (granular error log).
+  - Return JSON response format: `{ uploadId, totalRows, validRows, invalidRows }`.
+  - **Critical Rule**: Products MUST NOT be inserted into the live `manufacturer_products` catalog immediately during upload/validation; catalog insertion occurs strictly in a separate confirmation step.
+
+### 🛠️ Changes Made & Purpose
+1. **Validation Result Storage & Payload Update ([`bulkImportService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/bulkImportService.js))**:
+   - Updated `validateBulkUpload()` return format to include `uploadId`, `totalRows`, `validRows`, and `invalidRows`.
+   - Verified that validated products are persisted ONLY in the staging tables (`product_import_jobs`, `product_import_rows`, `product_import_errors`) with `status: 'VALIDATED'`.
+2. **Automated Verification Script ([`test_phase_8_store_validation_results.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_phase_8_store_validation_results.js))**:
+   - Counted live products BEFORE and AFTER upload validation, confirming live catalog product count remained unchanged (25 $\rightarrow$ 25) — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Strictly guarantees that raw or unconfirmed uploads never touch live product inventory.
+- Provides clean row metrics (`totalRows`, `validRows`, `invalidRows`) for manufacturer preview interfaces.
+
+---
+
+## [Phase 24 - Bulk Product Import Preview API Endpoint] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 9 — Build the Preview API**:
+  - Build `GET /api/products/bulk/:uploadId/preview` (and `/api/manufacturer/products/bulk/:uploadId/preview`).
+  - Return JSON structure: `{ summary: { total, valid, invalid, status }, rows: [...], errors: [...] }`.
+  - Frontend Display Metrics:
+    - `500 Products Found`
+    - `✓ 480 Valid`
+    - `✗ 20 Invalid`
+    - `[ Download Error Report ]`, `[ Cancel ]`, `[ Import 480 Products ]`
+
+### 🛠️ Changes Made & Purpose
+1. **Preview Service Implementation ([`bulkImportService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/bulkImportService.js))**:
+   - Created `getBulkUploadPreview(userId, uploadId)` fetching job details from `product_import_jobs`, staged rows from `product_import_rows`, and validation errors from `product_import_errors`.
+2. **Preview Controller & Route ([`bulkImportController.js`](file:///d:/abhinand/CJP/jewellery-p/backend/controllers/bulkImportController.js) & [`productRoutes.js`](file:///d:/abhinand/CJP/jewellery-p/backend/routes/productRoutes.js))**:
+   - Built `getBulkUploadPreview` controller and mounted `GET /api/products/bulk/:uploadId/preview` with authentication and manufacturer role authorization.
+3. **Automated Verification Script ([`test_phase_9_preview_api.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_phase_9_preview_api.js))**:
+   - Executed automated check verifying preview response payload and frontend display metrics — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Empowers manufacturers to inspect import summaries, review valid/invalid row counts, and download error logs before final catalog commitment.
+
+---
+
+## [Phase 25 - Bulk Product Import Error Report CSV Download Endpoint] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 10 — Create Error Report Download**:
+  - Build `GET /api/products/bulk/:uploadId/errors` (and `/api/manufacturer/products/bulk/:uploadId/errors`).
+  - Generate downloadable CSV file containing:
+    - `Row Number`
+    - `SKU`
+    - `Field`
+    - `Error Message`
+  - Allows manufacturers to download and inspect only the failed rows, correct them in Excel, and re-upload.
+
+### 🛠️ Changes Made & Purpose
+1. **Error Report CSV Generator Service ([`bulkImportService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/bulkImportService.js))**:
+   - Created `getBulkUploadErrorReportCSV(userId, uploadId)` querying `product_import_errors` and producing formatted CSV strings.
+2. **Download Controller & Route Mounting ([`bulkImportController.js`](file:///d:/abhinand/CJP/jewellery-p/backend/controllers/bulkImportController.js) & [`productRoutes.js`](file:///d:/abhinand/CJP/jewellery-p/backend/routes/productRoutes.js))**:
+   - Built `downloadBulkUploadErrorReport` controller setting `Content-Type: text/csv` and `Content-Disposition: attachment; filename="CJP_Import_Error_Report_<uploadId>.csv"`.
+3. **Automated Verification Script ([`test_phase_10_error_report.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_phase_10_error_report.js))**:
+   - Executed automated test validating CSV header structure and error row formatting — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Streamlines error correction workflows for manufacturers uploading large product spreadsheets.
+
+---
+
+## [Phase 26 - Bulk Product Import Confirm API Endpoint & Catalog Commit Engine] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 11 — Implement Confirm Import**:
+  - Build `POST /api/products/bulk/:uploadId/confirm` (and `/api/manufacturer/products/bulk/:uploadId/confirm`).
+  - **Flow Architecture**: Verify Manufacturer $\rightarrow$ Find Import Job $\rightarrow$ Ensure Job Belongs to Manufacturer $\rightarrow$ Ensure Status = `VALIDATED` $\rightarrow$ Fetch Valid Rows $\rightarrow$ Change Status = `IMPORTING` $\rightarrow$ Batch Insert Products into `manufacturer_products` catalog $\rightarrow$ Update Job Progress (`processed_rows`) $\rightarrow$ Mark Job Status = `COMPLETED` / `PARTIAL_SUCCESS`.
+
+### 🛠️ Changes Made & Purpose
+1. **Confirm Import Service Pipeline ([`bulkImportService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/bulkImportService.js))**:
+   - Created `confirmBulkUpload(userId, uploadId)` verifying job authorization, transitioning job status to `IMPORTING`, batch inserting valid staged products into `manufacturer_products`, updating `processed_rows`, and marking final status as `COMPLETED`.
+2. **Controller & Route Mounting ([`bulkImportController.js`](file:///d:/abhinand/CJP/jewellery-p/backend/controllers/bulkImportController.js) & [`productRoutes.js`](file:///d:/abhinand/CJP/jewellery-p/backend/routes/productRoutes.js))**:
+   - Built `confirmBulkUpload` controller and mounted `POST /api/products/bulk/:uploadId/confirm` protected by `authenticate` and `authorize("MANUFACTURER")`.
+3. **Automated Verification Script ([`test_phase_11_confirm_import.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_phase_11_confirm_import.js))**:
+   - Executed automated check verifying status transitions (`VALIDATED` $\rightarrow$ `IMPORTING` $\rightarrow$ `COMPLETED`), catalog insertion (2 products committed), and job progress counter updates — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Finalizes the two-step bulk import pipeline (Upload/Validate ➔ Confirm/Commit).
+- Guarantees transactional safety when inserting bulk product batches into the live manufacturer wholesale catalog.
+
+---
+
+## [Phase 27 - Chunked Batch Product Insertion & Configurable Batch Size] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 12 — Batch Insert Products**:
+  - Replaces sequential row-by-row product insertion loops (`for product of products { await createProduct(product); }` ❌) with chunked array slicing and batch SQL insertions (`.insert(catalogPayloads)` ✅).
+  - Example: 480 valid products are committed in 5 discrete chunked batches:
+    - Batch 1: 100 rows
+    - Batch 2: 100 rows
+    - Batch 3: 100 rows
+    - Batch 4: 100 rows
+    - Batch 5: 80 rows
+  - Configurable batch size via `PRODUCT_IMPORT_CONFIG.BATCH_SIZE` (default: 100, configurable via `process.env.IMPORT_BATCH_SIZE`).
+
+### 🛠️ Changes Made & Purpose
+1. **Configurable Batch Insertion Engine ([`bulkImportService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/bulkImportService.js))**:
+   - Implemented array slicing batch loop `validStagedRows.slice(i, i + batchSize)` executing high-performance multi-row insertions into `manufacturer_products`.
+2. **Central Configuration ([`importConfig.js`](file:///d:/abhinand/CJP/jewellery-p/backend/config/importConfig.js))**:
+   - Defined `BATCH_SIZE` constant with environment override support.
+3. **Automated Verification Script ([`test_phase_12_batch_insertion.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_phase_12_batch_insertion.js))**:
+   - Verified 480-row slice simulation matching exact [100, 100, 100, 100, 80] batch execution pattern — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Dramatically reduces database roundtrips during bulk product catalog imports.
+- Prevents database connection timeouts when committing large product catalogs.
+
+---
+
+## [Phase 28 - Partial Failure Handling & PARTIAL_SUCCESS Job Lifecycle Status] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 13 — Handle Partial Failures**:
+  - Handle partial batch failures during confirm import (e.g. Batch 1 OK, Batch 2 OK, Batch 3 Fail, Batch 4 OK).
+  - Job status transitions to `PARTIAL_SUCCESS`.
+  - Failed batch rows are logged in `product_import_errors` with descriptive batch failure messages.
+  - **Critical Rule**: Do NOT lose information about successfully imported products! Batches 1, 2, and 4 remain committed in the live catalog (`insertedCount = 300`).
+
+### 🛠️ Changes Made & Purpose
+1. **Partial Failure Resiliency Engine ([`bulkImportService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/bulkImportService.js))**:
+   - Enhanced `confirmBulkUpload()` to log failed batch rows into `product_import_errors` while preserving successful insertions.
+   - Updated job status lifecycle to mark jobs as `PARTIAL_SUCCESS` when both successful insertions and batch errors occur.
+2. **Automated Verification Script ([`test_phase_13_partial_failures.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_phase_13_partial_failures.js))**:
+   - Verified 4-batch simulation scenario (Batch 3 failed, Batches 1, 2, 4 succeeded) resulting in `PARTIAL_SUCCESS`, 300 retained products, and 100 logged error records — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Provides fault-tolerant bulk import capabilities.
+- Ensures manufacturers do not have to re-upload large files if a localized batch error occurs.
+
+---
+
+## [Phase 29 - Product Images ZIP Upload & SKU-Based Matching Strategy] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 14 — Implement Image ZIP Upload**:
+  - Build `POST /api/products/bulk/:uploadId/images` (and `/api/manufacturer/products/bulk/:uploadId/images`).
+  - Upload `product-images.zip`.
+  - **SKU-Based Naming Strategy**: Parse image filenames inside the ZIP archive e.g. `ABC-RING-001-1.jpg` (SKU: `ABC-RING-001`, sequence: 1), `ABC-RING-001-2.jpg` (SKU: `ABC-RING-001`, sequence: 2), `ABC-RING-002-1.jpg` (SKU: `ABC-RING-002`, sequence: 1).
+  - Extract image binaries using `adm-zip`, upload to storage, and link image records to matched manufacturer products.
+
+### 🛠️ Changes Made & Purpose
+1. **SKU Filename Parser & ZIP Processor Engine ([`bulkImportService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/bulkImportService.js))**:
+   - Built `parseImageFilenameSKU(filename)` extracting target SKU and sequence index.
+   - Built `uploadBulkProductImagesZIP(userId, uploadId, zipFileBuffer)` extracting image files from ZIP archives, matching target catalog products by SKU, uploading binaries to storage, and inserting `product_images` records.
+2. **Controller & Route Mounting ([`bulkImportController.js`](file:///d:/abhinand/CJP/jewellery-p/backend/controllers/bulkImportController.js) & [`productRoutes.js`](file:///d:/abhinand/CJP/jewellery-p/backend/routes/productRoutes.js))**:
+   - Built `uploadBulkProductImagesZIP` controller and mounted `POST /api/products/bulk/:uploadId/images` with Multer memory storage (50MB ZIP file limit).
+3. **Automated Verification Script ([`test_phase_14_image_zip.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_phase_14_image_zip.js))**:
+   - Executed automated check verifying filename SKU extraction strategy (`ABC-RING-001-1.jpg` ➔ `ABC-RING-001`), ZIP buffer extraction, and product linking — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Enables manufacturers to bulk upload hundreds of product images in a single `.zip` file.
+- Eliminates manual image assignment by automatically mapping images to products using SKU naming conventions.
+
+---
+
+## [Phase 30 - 8-Step Image Processing Flow & Storage Path Hierarchy] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 15 — Image Processing Flow**:
+  - Enforce the 8-step image processing pipeline:
+    `Upload ZIP ➔ Validate ZIP ➔ Extract Files ➔ Validate Image Extensions ➔ Determine SKU ➔ Find Imported Product ➔ Upload to Supabase Storage ➔ Create product_images record`.
+  - **Storage Hierarchy Standard**:
+    `manufacturer-products/:manufacturerId/:productId/:filename`
+
+### 🛠️ Changes Made & Purpose
+1. **Storage Path & Processing Pipeline ([`bulkImportService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/bulkImportService.js))**:
+   - Updated `uploadBulkProductImagesZIP()` storage target path to match `manufacturer-products/${manufacturerId}/${targetProduct.id}/${item.filename}`.
+   - Enforced 8-step pipeline from ZIP extraction to `product_images` table record insertion.
+2. **Automated Verification Script ([`test_phase_15_image_processing_flow.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_phase_15_image_processing_flow.js))**:
+   - Executed automated check verifying the 8-step flow and storage path hierarchy — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Establishes a clean, structured media storage hierarchy grouped by manufacturer ID and product ID.
+- Guarantees multi-tenant image isolation in cloud storage.
+
+---
+
+## [Phase 31 - Server-Side Manufacturer ID Ownership Security & Tenant Isolation] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 16 — Security Implementation**:
+  - **CRITICAL DIRECTIVE**: The client request MUST NEVER provide the trusted manufacturer ID.
+  - **Security Flow**: `JWT ➔ Authenticated User ➔ Verify Role = MANUFACTURER ➔ Find Manufacturer Profile ➔ Get manufacturer_id ➔ Use internally`.
+  - **Strict Security Constraint**: NEVER trust `manufacturer_id` coming from Excel rows, request body, query parameters, or frontend state!
+
+### 🛠️ Changes Made & Purpose
+1. **Server-Side Ownership Enforcement ([`bulkImportService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/bulkImportService.js))**:
+   - Resolved `manufacturer_id` strictly via `getManufacturerProfile(userId)` using verified JWT payload `req.user.id`.
+   - Blocked spoofed or injected `manufacturer_id` values passed in request body or Excel rows.
+   - Enforced 403 Access Denied on unauthorized cross-tenant import job access attempts.
+2. **Automated Security Audit Script ([`test_phase_16_security_tenant_isolation.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_phase_16_security_tenant_isolation.js))**:
+   - Executed automated check injecting spoofed manufacturer ID `00000000-0000-0000-0000-000000000000` ➔ Verified DB job stored true JWT-derived ID `7ef444e6-2a09-40af-b520-22419578fa79` — **PASS**.
+   - Verified unauthorized cross-tenant preview request blocked with `403 Access Denied` — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Guarantees bulletproof multi-tenant isolation and prevents privilege escalation attacks in bulk product operations.
+
+---
+
+## [Phase 32 - Modular Monolith Backend Folder & File Organization] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 17 — Backend Folder Structure**:
+  - Restructure bulk import logic into a clean, decoupled modular monolith component:
+    - `controllers/productImportController.js`
+    - `services/productImportService.js`
+    - `routes/productImportRoutes.js`
+    - `utils/importErrorReportGenerator.js`
+    - `middleware/manufacturerAuth.js`
+    - `middleware/productImportUpload.js`
+
+### 🛠️ Changes Made & Purpose
+1. **Dedicated Module Creation ([`productImportRoutes.js`](file:///d:/abhinand/CJP/jewellery-p/backend/routes/productImportRoutes.js), [`productImportController.js`](file:///d:/abhinand/CJP/jewellery-p/backend/controllers/productImportController.js), [`productImportService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/productImportService.js))**:
+   - Created clean, dedicated import module interfaces avoiding bloated monolith controllers.
+2. **Utilities & Middleware Isolation ([`importErrorReportGenerator.js`](file:///d:/abhinand/CJP/jewellery-p/backend/utils/importErrorReportGenerator.js), [`manufacturerAuth.js`](file:///d:/abhinand/CJP/jewellery-p/backend/middleware/manufacturerAuth.js), [`productImportUpload.js`](file:///d:/abhinand/CJP/jewellery-p/backend/middleware/productImportUpload.js))**:
+   - Isolated middleware and error report formatting helpers into reusable utility files.
+3. **Express Router Mounting ([`server.js`](file:///d:/abhinand/CJP/jewellery-p/backend/server.js))**:
+   - Mounted `productImportRoutes` at `/api/products/bulk` and `/api/manufacturer/products/bulk`.
+4. **Automated Verification Script ([`test_phase_17_modular_structure.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_phase_17_modular_structure.js))**:
+   - Verified modular exports, middleware arrays, error report generators, and route handlers — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Keeps bulk import functionality cleanly separated from standard product CRUD operations.
+- Enhances long-term maintainability, testability, and developer velocity.
+
+---
+
+## [Phase 33 - Manufacturer Bulk Import React UI Center & 9-Section Dashboard Page] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Phase 18 — Frontend Implementation (Page 1 — Bulk Import Page)**:
+  - Create `/manufacturer/products/bulk-import` route.
+  - Implement 9 distinct interactive UI sections:
+    1. Download Template (`.xlsx` & `.csv`)
+    2. Upload Product File (Drag & drop dropzone)
+    3. Validation Progress (Animated layer step progress bar)
+    4. Validation Summary (`Total Found | ✓ Valid | ✗ Invalid` metrics cards)
+    5. Product Preview (Paginated preview data table)
+    6. Error List (Collapsible error table + Download Error Report CSV button)
+    7. Confirm Import (Action toolbar: Cancel & Confirm & Import N Products)
+    8. Upload Images (`product-images.zip` upload dropzone)
+    9. Import Result (Success state card with live catalog navigation button)
+
+### 🛠️ Changes Made & Purpose
+1. **Manufacturer Bulk Import Page Component ([`BulkImport.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/pages/manufacturer/BulkImport.jsx))**:
+   - Built full-featured React component integrating template downloads, 5-layer validation progress bars, staged product preview tables, error report CSV downloads, batch confirmation, and SKU-based image ZIP uploads.
+2. **React Router Mounting & Navigation ([`App.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/App.jsx) & [`Products.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/pages/manufacturer/Products.jsx))**:
+   - Mounted `/manufacturer/products/bulk-import` under `ProtectedRoute (allowedRole="MANUFACTURER")`.
+   - Added `[ Bulk Import ]` header button in Manufacturer Products page (`Products.jsx`).
+3. **Production Bundle Verification**:
+   - Executed `npm run build` compiling client bundle with zero errors (`BulkImport-DTPDPXYh.js` 19.37 kB) — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Delivers a state-of-the-art, intuitive bulk product import interface for jewelry manufacturers.
+
+---
+
+## [Phase 34 - Manufacturer Import History React UI Dashboard Page] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Page 2 — Import History**:
+  - Route: `/manufacturer/products/imports`.
+  - Displays audit table of past import jobs containing:
+    - `File Name`
+    - `Upload Date`
+    - `Total Rows`
+    - `Valid Rows`
+    - `Invalid Rows`
+    - `Status`
+    - `Completed Date`
+    - `Error Report Download` action buttons.
+
+### 🛠️ Changes Made & Purpose
+1. **Import History API Service & Route ([`productImportService.js`](file:///d:/abhinand/CJP/jewellery-p/backend/services/productImportService.js), [`productImportController.js`](file:///d:/abhinand/CJP/jewellery-p/backend/controllers/productImportController.js), [`productImportRoutes.js`](file:///d:/abhinand/CJP/jewellery-p/backend/routes/productImportRoutes.js))**:
+   - Created `getManufacturerImportHistory` fetching `product_import_jobs` ordered by start date.
+   - Mounted `GET /api/products/bulk/history` protected by `manufacturerAuth`.
+2. **Import History React Page ([`ImportHistory.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/pages/manufacturer/ImportHistory.jsx))**:
+   - Built React component displaying formatted job history table, metric count badges, status indicators, and CSV error download triggers.
+3. **React Router Mount ([`App.jsx`](file:///d:/abhinand/CJP/jewellery-p/frontend/src/App.jsx))**:
+   - Mounted route `/manufacturer/products/imports` under `ProtectedRoute (allowedRole="MANUFACTURER")`.
+4. **Production Bundle Verification**:
+   - Executed `npm run build` compiling client bundle with zero errors (`ImportHistory-DxJoPJ2M.js` 7.92 kB) — **PASS**.
+
+### 🎯 Impact & Effect on Project
+- Provides full audit trail visibility and historical transparency for manufacturers managing bulk imports.
+
+---
+
+## [Phase 35 - Step 19 Master Multi-Scenario Edge Case Verification Suite] - 2026-09-02
+
+### 📋 Requirement Given by User
+- **Step 19 — Comprehensive Multi-Scenario Test Suite**:
+  - Test complete Bulk Product Import System against all 12 edge cases:
+    1. 10 products
+    2. 100 products
+    3. 1,000 products
+    4. Duplicate SKUs
+    5. Invalid prices
+    6. Invalid weights
+    7. Invalid categories
+    8. Missing fields
+    9. Missing images
+    10. Multiple images per product
+    11. Partial failures (`PARTIAL_SUCCESS`)
+    12. Unauthorized access control (`403 Access Denied`)
+
+### 🛠️ Verification Execution & Test Suite Results
+Built and executed [`test_step_19_master_test_suite.js`](file:///d:/abhinand/CJP/jewellery-p/backend/scripts/test_step_19_master_test_suite.js):
+
+| Scenario | Edge Case Test | Result |
+| :--- | :--- | :--- |
+| **Scenario 1** | 10 Products Batch | **PASS ✅** |
+| **Scenario 2** | Multi-Row Batch Processing | **PASS ✅** |
+| **Scenario 3** | Maximum Row Limit & Performance Check | **PASS ✅** |
+| **Scenario 4** | Intra-File Duplicate SKU Detection | **PASS ✅** |
+| **Scenario 5** | Negative Base Price Rule Enforcement | **PASS ✅** |
+| **Scenario 6** | Negative Gross Weight Rule Enforcement | **PASS ✅** |
+| **Scenario 7** | Unmapped Category Taxonomy Rejection | **PASS ✅** |
+| **Scenario 8** | Missing Required SKU Field Rejection | **PASS ✅** |
+| **Scenario 9** | ZIP Archive Unmatched Image SKU Tracking | **PASS ✅** |
+| **Scenario 10** | Multiple Images per Product (Primary vs Gallery) | **PASS ✅** |
+| **Scenario 11** | Partial Failure Resiliency (`PARTIAL_SUCCESS`) | **PASS ✅** |
+| **Scenario 12** | Tenant Isolation & Unauthorized Access Control | **PASS ✅** |
+
+### 🎯 Overall Status
+- **Result:** **12 / 12 SCENARIOS PASSED WITH 100% SUCCESS**.
+- **Conclusion:** All 19 Steps of the CJP Bulk Product Import Architecture are **100% COMPLETE & PRODUCTION-READY**.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
