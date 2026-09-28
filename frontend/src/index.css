@@ -28,11 +28,38 @@ h1, h2, h3, .font-serif-title {
 
 /* Gold Gradients & Luxury Classes */
 .bg-gradient-gold {
-  background: linear-gradient(135deg, #D4AF37 0%, #F3E1B9 50%, #AA771C 100%);
+  background: linear-gradient(135deg, #C59B27 0%, #D4AF37 50%, #A68868 100%);
 }
 
 .bg-gradient-gold-dark {
   background: linear-gradient(135deg, #B8860B 0%, #D4AF37 50%, #7C520E 100%);
+}
+
+.shadow-gold {
+  box-shadow: 0 4px 14px 0 rgba(212, 175, 55, 0.35);
+}
+
+.shadow-gold-lg {
+  box-shadow: 0 6px 20px 0 rgba(212, 175, 55, 0.45);
+}
+
+.glass {
+  background: rgba(251, 249, 245, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(205, 213, 219, 0.6);
+}
+
+.text-primary {
+  color: #A68868;
+}
+
+.bg-primary {
+  background-color: #A68868;
+}
+
+.font-heading {
+  font-family: 'Cormorant Garamond', Georgia, serif;
 }
 
 .text-gold-gradient {
@@ -60,6 +87,24 @@ h1, h2, h3, .font-serif-title {
 }
 
 /* Light Luxe Ivory Utility Classes */
+.card-luxury {
+  background-color: #FFFFFF;
+  border: 1px solid #CDD5DB;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-luxury:hover {
+  border-color: #A68868;
+  box-shadow: 0 8px 30px rgba(212, 175, 55, 0.18);
+  transform: translateY(-4px);
+}
+
+.bg-gradient-gold-light {
+  background: linear-gradient(135deg, rgba(227, 195, 157, 0.4) 0%, rgba(212, 175, 55, 0.2) 100%);
+}
+
 .card-luxe {
   background-color: #FFFFFF;
   border: 1px solid #EFEBE4;
@@ -110,3 +155,118 @@ h1, h2, h3, .font-serif-title {
 .animate-fadeIn {
   animation: fadeIn 0.25s ease-out forwards;
 }
+
+/* Parallax Component Styles */
+.parallax {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(135deg, #2D231D 0%, #1A130F 50%, #251C17 100%);
+  color: #ffffff;
+}
+
+.parallax__header {
+  position: relative;
+  width: 100%;
+  height: 70vh;
+  min-height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #1A130F;
+}
+
+.parallax__visuals {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.parallax__black-line-overflow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #A68868;
+  z-index: 10;
+  opacity: 0.5;
+}
+
+.parallax__layers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.parallax__layer-img {
+  position: absolute;
+  top: -15%;
+  left: -5%;
+  width: 110%;
+  height: 130%;
+  min-width: 100%;
+  min-height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.parallax__layer-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  text-align: center;
+  width: 100%;
+  padding: 0 1.5rem;
+  will-change: transform;
+}
+
+.parallax__title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #F7E7C4;
+  margin: 0;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.4);
+}
+
+.parallax__fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 160px;
+  background: linear-gradient(to bottom, transparent, #1A130F);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.parallax__content {
+  position: relative;
+  width: 100%;
+  min-height: 28vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 1.5rem;
+  background: linear-gradient(to bottom, #1A130F, #261D17);
+  border-top: 1px solid rgba(166, 136, 104, 0.2);
+}
+
+.osmo-icon-svg {
+  width: 70px;
+  height: 70px;
+  color: #D4AF37;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.4));
+}
+

@@ -134,6 +134,9 @@ export default function ProductCard({ product, onToggleWishlist, isWishlisted = 
               <Sparkles className="w-3 h-3 text-[#A68868]" /> {purity}
             </span>
           )}
+          <span className="px-2.5 py-1 rounded-full bg-[#FAF8F5]/95 backdrop-blur-md border border-[#D4AF37]/50 text-[10px] font-black text-black tracking-wider flex items-center gap-1 shadow-xs">
+            <ShieldCheck className="w-3 h-3 text-[#A68868]" /> BIS Hallmark
+          </span>
           <span
             className={`px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wide border flex items-center gap-1 backdrop-blur-md shadow-xs ${
               isAvailable
@@ -166,13 +169,19 @@ export default function ProductCard({ product, onToggleWishlist, isWishlisted = 
           <Heart className={`w-4 h-4 ${wishlisted ? "fill-rose-500 text-rose-500" : ""}`} />
         </button>
 
-        {/* Quick View Overlay Button */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-4">
+        {/* Quick View & Try-On Overlay Buttons */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-3 gap-2">
           <Link
             to={`/customer/products/${id}`}
-            className="w-full py-2.5 rounded-full bg-[#A68868] border border-white/40 text-white text-xs font-black text-center flex items-center justify-center gap-2 hover:bg-[#8A6D4F] transition-all shadow-md"
+            className="flex-1 py-2.5 rounded-full bg-[#0D0D0E] border border-white/20 text-white text-[11px] font-black text-center flex items-center justify-center gap-1.5 hover:bg-[#A68868] transition-all shadow-md"
           >
-            <Eye className="w-4 h-4 text-white" /> View Details
+            <Eye className="w-3.5 h-3.5 text-[#E3C39D]" /> Try-On
+          </Link>
+          <Link
+            to={`/customer/products/${id}`}
+            className="flex-1 py-2.5 rounded-full bg-[#A68868] border border-white/40 text-white text-[11px] font-black text-center flex items-center justify-center gap-1.5 hover:bg-[#8A6D4F] transition-all shadow-md"
+          >
+            Details
           </Link>
         </div>
       </div>

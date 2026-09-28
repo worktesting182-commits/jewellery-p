@@ -17,12 +17,24 @@ import {
   UserCheck,
   Home,
   Check,
+  Camera,
+  TrendingUp,
+  Coins,
+  Layers,
+  Brain,
+  Shield,
+  Package,
+  Globe,
+  Factory,
 } from "lucide-react";
 import heroImg from "../../assets/hero.png";
 import threeWomenBanner from "../../assets/three women_banner.png";
+import luxeHeroBanner from "../../assets/luxe_hero_banner.jpg";
 import product1Ring from "../../assets/Product 1-ring.png";
 import product2Bangle from "../../assets/Product 2-bangle.png";
 import product3Jewel from "../../assets/Product 3-jewel.png";
+import { ParallaxComponent } from "../../components/ui/component";
+
 
 export default function CustomerDashboard() {
   const navigate = useNavigate();
@@ -93,13 +105,6 @@ export default function CustomerDashboard() {
     { id: "p3", name: "Ice Filter Diamond Pendant", desc: "Refreshing brilliant sparkle", price: "260 ₹", image: product3Jewel },
   ];
 
-  // Preset fallback recommended items using provided assets
-  const recommendedItems = [
-    { id: "r1", name: "Almond Croissant Ring", desc: "Crispy on the outside, delicate inside", price: "220 ₹", image: product1Ring },
-    { id: "r2", name: "Berry Cheesecake Bangle", desc: "Sweet dessert with seasonal stones", price: "260 ₹", image: product2Bangle },
-    { id: "r3", name: "Chocolate Cookie Jewel", desc: "Warm, rich and full of sparkles", price: "160 ₹", image: product3Jewel },
-  ];
-
   return (
     <div className="space-y-16 py-4">
 
@@ -111,272 +116,574 @@ export default function CustomerDashboard() {
         </div>
       )}
 
-      {/* 1. Hero Section */}
-      <section className="relative rounded-3xl bg-[#CDD5DB]/30 p-6 sm:p-10 border border-[#CDD5DB] shadow-xs overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      {/* 1. Luxe Hero Section (Styled matching Luxe Cloud Trade Hero) */}
+      <section className="relative rounded-[2.5rem] bg-gradient-to-br from-[#FAF8F5] via-white to-[#E3C39D]/20 p-8 sm:p-12 border border-[#CDD5DB] shadow-md overflow-hidden min-h-[560px] flex items-center">
+        
+        {/* Ambient Radial Floating Glow Accents */}
+        <div className="absolute top-1/4 right-0 w-96 h-96 bg-[#A68868]/15 rounded-full blur-3xl pointer-events-none animate-pulse" />
+        <div className="absolute bottom-1/4 left-0 w-96 h-96 bg-[#D4AF37]/10 rounded-full blur-3xl pointer-events-none animate-pulse" style={{ animationDelay: "2s" }} />
+
+        <div className="relative w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center z-10">
           
-          {/* Left Column */}
-          <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#E3C39D]/40 border border-[#A68868]/40 text-black text-xs font-black tracking-wide">
-              <Gem className="w-3.5 h-3.5 text-[#A68868]" />
-              <span>Specialty Crafts & Jewellery</span>
+          {/* Left Column: Heading, Subtitle, CTAs & Stats */}
+          <div className="lg:col-span-7 space-y-6">
+            
+            {/* Top Pill Badge */}
+            <div className="inline-flex items-center gap-2 glass-ivory px-4 py-2 rounded-full border border-[#D4AF37]/40 shadow-xs">
+              <Sparkles className="w-4 h-4 text-[#A68868]" />
+              <span className="text-xs sm:text-sm font-black text-[#A68868] uppercase tracking-wider">
+                India's #1 Specialty Jewellery Platform
+              </span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl font-black text-black tracking-tight leading-tight">
-              Jewellery You Fall in Love With From the First Glance
+            {/* Main Luxury Heading */}
+            <h1 className="font-heading text-4xl sm:text-6xl lg:text-6xl font-bold leading-[1.08] tracking-tight text-black">
+              Jewellery You Fall in Love With <span className="text-gold-gradient">From the First Glance</span>
             </h1>
 
-            <p className="text-xs sm:text-sm text-black/80 font-bold leading-relaxed max-w-lg">
+            {/* Subtitle */}
+            <p className="text-sm sm:text-base text-black/80 font-semibold max-w-xl leading-relaxed">
               Specialty handcrafted gold, fine gemstones, and a cozy luxury atmosphere crafted direct from master artisans for {user?.full_name || "you"}.
             </p>
 
-            <div>
+            {/* CTAs */}
+            <div className="flex flex-wrap items-center gap-4 pt-2">
               <Link
                 to="/customer/products"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#A68868] hover:bg-[#8A6D4F] text-white text-xs font-black tracking-wide shadow-md hover:shadow-lg transition-all duration-200"
+                className="bg-gradient-gold text-white px-7 py-3.5 rounded-full font-bold shadow-gold hover:shadow-gold-lg transition-all duration-300 hover:scale-105 inline-flex items-center gap-2 text-xs uppercase tracking-wide"
               >
-                <span>Browse Menu</span>
-                <ArrowRight className="w-4 h-4 text-white" />
+                <span>Explore Marketplace</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                to="/customer/products"
+                className="glass border border-[#CDD5DB] px-7 py-3.5 rounded-full font-bold text-black hover:bg-white/80 transition-all duration-300 inline-flex items-center gap-2 text-xs uppercase tracking-wide shadow-xs"
+              >
+                <Sparkles className="w-4 h-4 text-[#A68868]" />
+                <span>Watch Demo</span>
               </Link>
             </div>
 
-            {/* 3 Pill Badges */}
-            <div className="flex flex-wrap items-center gap-3 pt-4">
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#CDD5DB] text-xs font-black text-black">
-                <Gem className="w-3.5 h-3.5 text-[#A68868]" />
-                <span>Specialty Jewels</span>
+            {/* KPI Stat Row */}
+            <div className="mt-8 flex flex-wrap items-center gap-6 sm:gap-8 pt-6 border-t border-[#CDD5DB]/60">
+              <div>
+                <p className="font-heading text-2xl sm:text-3xl font-bold text-black">10,000+</p>
+                <p className="text-xs text-black/70 font-black uppercase tracking-wider">Cloud Products</p>
               </div>
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#CDD5DB] text-xs font-black text-black">
-                <Heart className="w-3.5 h-3.5 text-[#A68868]" />
-                <span>Made with Love</span>
+              <div className="w-px h-10 bg-[#CDD5DB]" />
+              <div>
+                <p className="font-heading text-2xl sm:text-3xl font-bold text-black">500+</p>
+                <p className="text-xs text-black/70 font-black uppercase tracking-wider">Master Artisans</p>
               </div>
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#CDD5DB] text-xs font-black text-black">
-                <Coffee className="w-3.5 h-3.5 text-[#A68868]" />
-                <span>Daily Elegance</span>
+              <div className="w-px h-10 bg-[#CDD5DB]" />
+              <div>
+                <p className="font-heading text-2xl sm:text-3xl font-bold text-black">100%</p>
+                <p className="text-xs text-black/70 font-black uppercase tracking-wider">Hallmark Certified</p>
               </div>
             </div>
+
           </div>
 
-          {/* Right Column */}
-          <div className="lg:col-span-6 flex justify-center">
-            <div className="relative w-full max-w-md aspect-[4/3] rounded-[2.5rem] bg-[#A68868] p-3 shadow-xl overflow-hidden group">
-              
-              {/* Image Container */}
-              <div className="w-full h-full rounded-[2rem] overflow-hidden bg-white/10 relative">
-                <img
-                  src={threeWomenBanner}
-                  alt="AuraCraft Specialty Jewellery Showcase"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-              </div>
+          {/* Right Column: Hero Visual with Glass Badges */}
+          <div className="lg:col-span-5 relative flex justify-center">
+            
+            {/* Image Card Container */}
+            <div className="relative aspect-[4/5] w-full max-w-md rounded-3xl overflow-hidden shadow-2xl border border-[#CDD5DB] group">
+              <img
+                src={luxeHeroBanner || threeWomenBanner}
+                alt="AuraCraft Specialty Jewellery Showcase"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+            </div>
 
-              {/* Floating Quality Badge */}
-              <div className="absolute bottom-6 right-6 bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-[#E3C39D] shadow-lg flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#A68868] text-white flex items-center justify-center text-xs font-bold">
-                  <Award className="w-4 h-4 text-white" />
+            {/* Floating Glass Card (Live Gold Rate Badge) */}
+            <div className="absolute -bottom-4 -left-4 sm:-left-6 glass-ivory rounded-2xl p-3.5 shadow-gold-lg border border-[#D4AF37]/40 backdrop-blur-md">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-gold flex items-center justify-center text-white shadow-xs shrink-0">
+                  <TrendingUp className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <span className="block text-[10px] font-black text-black uppercase tracking-wider">100% Certified</span>
-                  <span className="block text-[9px] font-extrabold text-[#A68868]">Hallmark Guarantee</span>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* 2. 4-Card Feature Grid */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        
-        <div className="p-6 rounded-3xl bg-white border border-[#CDD5DB] shadow-xs space-y-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#E3C39D]/30 flex items-center justify-center text-[#A68868]">
-            <Gem className="w-5 h-5" />
-          </div>
-          <h3 className="text-sm font-black text-black">Selected Metals</h3>
-          <p className="text-xs font-bold text-black/70 leading-relaxed">
-            We work exclusively with certified mines and ethically sourced specialty lots.
-          </p>
-        </div>
-
-        <div className="p-6 rounded-3xl bg-white border border-[#CDD5DB] shadow-xs space-y-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#E3C39D]/30 flex items-center justify-center text-[#A68868]">
-            <Flame className="w-5 h-5" />
-          </div>
-          <h3 className="text-sm font-black text-black">Fresh Crafting</h3>
-          <p className="text-xs font-bold text-black/70 leading-relaxed">
-            Hand-cut and polished in small artisan batches every single week.
-          </p>
-        </div>
-
-        <div className="p-6 rounded-3xl bg-white border border-[#CDD5DB] shadow-xs space-y-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#E3C39D]/30 flex items-center justify-center text-[#A68868]">
-            <UserCheck className="w-5 h-5" />
-          </div>
-          <h3 className="text-sm font-black text-black">Master Artisans</h3>
-          <p className="text-xs font-bold text-black/70 leading-relaxed">
-            Professional jewelers crafting with soul, care, and utmost precision.
-          </p>
-        </div>
-
-        <div className="p-6 rounded-3xl bg-white border border-[#CDD5DB] shadow-xs space-y-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#E3C39D]/30 flex items-center justify-center text-[#A68868]">
-            <Home className="w-5 h-5" />
-          </div>
-          <h3 className="text-sm font-black text-black">Cozy Experience</h3>
-          <p className="text-xs font-bold text-black/70 leading-relaxed">
-            Bright, calm, and exquisite — your place of inspiration and elegance.
-          </p>
-        </div>
-
-      </section>
-
-      {/* 3. Popular Collections Section */}
-      <section className="rounded-3xl bg-[#A68868] p-8 sm:p-10 border border-[#8A6D4F] shadow-md text-white">
-        
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
-          <div>
-            <h2 className="text-2xl font-black tracking-tight text-white">Popular Collections</h2>
-            <p className="text-xs text-[#E3C39D] mt-1 font-extrabold">
-              Classic and author signature designs for every taste.
-            </p>
-          </div>
-          <Link
-            to="/customer/products"
-            className="px-6 py-2.5 rounded-full bg-[#E3C39D] hover:bg-white text-black text-xs font-black transition-all shadow-xs"
-          >
-            View Full Menu
-          </Link>
-        </div>
-
-        {/* 3 Circular Product Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {popularItems.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white/15 backdrop-blur-md rounded-3xl p-5 border border-white/30 hover:bg-white/25 transition-all flex flex-col items-center text-center space-y-4 group"
-            >
-              <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-white shadow-md bg-white p-1 group-hover:scale-105 transition-transform duration-300">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-full object-cover rounded-full"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <h3 className="text-sm font-black text-white tracking-wide">{item.name}</h3>
-                <p className="text-[11px] text-[#E3C39D] font-bold">{item.desc}</p>
-              </div>
-
-              <div className="text-sm font-black text-white pt-1">{item.price}</div>
-            </div>
-          ))}
-        </div>
-
-      </section>
-
-      {/* 4. "Recommended to Try" Section */}
-      <section className="space-y-8">
-        
-        <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2 text-[#A68868] text-xs font-black uppercase tracking-widest">
-            <span>♥</span>
-            <h2>Recommended to Try</h2>
-            <span>♥</span>
-          </div>
-          <p className="text-xs font-bold text-black/70">Handpicked customer favorites with instant cart access</p>
-        </div>
-
-        {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {recommendedItems.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-3xl p-5 border border-[#CDD5DB] shadow-xs flex items-center gap-4 hover:shadow-md transition-all group"
-            >
-              <div className="w-24 h-24 rounded-2xl overflow-hidden border border-[#CDD5DB] bg-white shrink-0">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-              </div>
-
-              <div className="flex-1 min-w-0 space-y-1">
-                <h3 className="text-xs font-black text-black truncate">{item.name}</h3>
-                <p className="text-[10px] text-black/70 font-bold line-clamp-2 leading-relaxed">{item.desc}</p>
-                
-                <div className="flex items-center justify-between pt-2">
-                  <span className="text-xs font-black text-black">{item.price}</span>
-                  
-                  <button
-                    onClick={() => handleQuickAdd(item.id, item.name)}
-                    className="w-8 h-8 rounded-full bg-[#A68868] hover:bg-[#8A6D4F] text-white flex items-center justify-center shadow-xs transition-transform active:scale-95"
-                    title="Add to Cart"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
+                  <p className="text-[10px] text-black/70 font-black uppercase tracking-wider">Live Gold Rate (22K)</p>
+                  <p className="font-heading text-lg font-bold text-black leading-tight">
+                    ₹6,800<span className="text-xs text-emerald-600 font-extrabold ml-1">/g ▲ 0.72%</span>
+                  </p>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
 
+            {/* Floating Top-Right Glass Card (Virtual Try-On Badge) */}
+            <div className="absolute -top-3 -right-3 sm:-right-4 glass-ivory rounded-2xl px-3.5 py-2.5 shadow-gold border border-[#D4AF37]/50 backdrop-blur-md">
+              <div className="flex items-center gap-2">
+                <Camera className="w-4 h-4 text-[#A68868]" />
+                <span className="text-xs font-black text-black">Virtual Try-On Ready</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
       </section>
 
-      {/* 5. Highlight Craft Section */}
-      <section className="rounded-3xl bg-[#CDD5DB]/30 p-8 sm:p-10 border border-[#CDD5DB] shadow-xs">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      {/* Dark Precious Metal Rate Ticker (Styled matching Luxe Cloud Trade Ticker) */}
+      <section className="bg-[#0D0D0E] text-white py-4 px-6 rounded-2xl border border-[#CDD5DB]/20 shadow-lg overflow-hidden my-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-center gap-8 flex-wrap">
           
-          <div className="lg:col-span-6 space-y-6">
-            <h2 className="text-2xl font-black text-black tracking-tight">
-              Jewels We Are Proud Of
+          {/* Gold 24K */}
+          <div className="flex items-center gap-2">
+            <Coins className="w-5 h-5 text-[#D4AF37]" />
+            <span className="text-xs sm:text-sm text-neutral-400 font-extrabold uppercase">Gold 24K:</span>
+            <span className="font-bold text-[#F3E1B9] text-sm">₹7,734/g</span>
+            <span className="text-xs text-emerald-400 font-black">▲ 0.8%</span>
+          </div>
+
+          {/* Gold 22K */}
+          <div className="flex items-center gap-2">
+            <Coins className="w-5 h-5 text-neutral-400" />
+            <span className="text-xs sm:text-sm text-neutral-400 font-extrabold uppercase">Gold 22K:</span>
+            <span className="font-bold text-white text-sm">₹7,384/g</span>
+            <span className="text-xs text-emerald-400 font-black">▲ 0.6%</span>
+          </div>
+
+          {/* Silver */}
+          <div className="flex items-center gap-2">
+            <Coins className="w-5 h-5 text-neutral-400" />
+            <span className="text-xs sm:text-sm text-neutral-400 font-extrabold uppercase">Silver:</span>
+            <span className="font-bold text-white text-sm">₹92.5/g</span>
+            <span className="text-xs text-rose-400 font-black">▼ 0.2%</span>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 2. Platform Features (Styled matching Luxe Cloud Trade Features) */}
+      <section id="features" className="py-12 sm:py-16 bg-[#CDD5DB]/15 rounded-3xl p-6 sm:p-10 border border-[#CDD5DB]/60">
+        <div className="max-w-7xl mx-auto space-y-12">
+          
+          {/* Header */}
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <p className="text-xs font-black text-[#A68868] uppercase tracking-widest">
+              Platform Features
+            </p>
+            <h2 className="font-heading text-3xl sm:text-5xl font-bold text-black tracking-tight">
+              Everything You Need to Sell Jewellery
             </h2>
-            <p className="text-xs text-black/80 leading-relaxed font-bold">
-              We travel, select the finest raw materials, refine every detail with perfection, and reveal the brilliant spark in every single piece.
+            <p className="text-xs sm:text-sm text-black/70 font-semibold leading-relaxed">
+              One unified platform with cloud inventory, AI tools, payments, CRM, and more.
+            </p>
+          </div>
+
+          {/* 6 Feature Cards */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <div className="card-luxury p-7 group">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-gold-light flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                <Layers className="w-6 h-6 text-[#A68868]" />
+              </div>
+              <h3 className="font-heading text-xl font-bold text-black mb-2">Cloud Inventory</h3>
+              <p className="text-xs sm:text-sm text-black/70 font-medium leading-relaxed">
+                Access thousands of jewellery designs without stocking a single piece. Sell from the cloud catalogue.
+              </p>
+            </div>
+
+            <div className="card-luxury p-7 group">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-gold-light flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                <Camera className="w-6 h-6 text-[#A68868]" />
+              </div>
+              <h3 className="font-heading text-xl font-bold text-black mb-2">AI Virtual Try-On</h3>
+              <p className="text-xs sm:text-sm text-black/70 font-medium leading-relaxed">
+                Let customers try rings, necklaces, and earrings virtually with AR rendering and face detection.
+              </p>
+            </div>
+
+            <div className="card-luxury p-7 group">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-gold-light flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                <Coins className="w-6 h-6 text-[#A68868]" />
+              </div>
+              <h3 className="font-heading text-xl font-bold text-black mb-2">Digital Gold</h3>
+              <p className="text-xs sm:text-sm text-black/70 font-medium leading-relaxed">
+                Buy, sell, and gift 24K digital gold. Secured vault, live pricing, and instant redemption.
+              </p>
+            </div>
+
+            <div className="card-luxury p-7 group">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-gold-light flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                <Brain className="w-6 h-6 text-[#A68868]" />
+              </div>
+              <h3 className="font-heading text-xl font-bold text-black mb-2">AI Recommendations</h3>
+              <p className="text-xs sm:text-sm text-black/70 font-medium leading-relaxed">
+                Smart product suggestions, visual search, and AI-powered customer segmentation.
+              </p>
+            </div>
+
+            <div className="card-luxury p-7 group">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-gold-light flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                <Shield className="w-6 h-6 text-[#A68868]" />
+              </div>
+              <h3 className="font-heading text-xl font-bold text-black mb-2">Escrow & Insurance</h3>
+              <p className="text-xs sm:text-sm text-black/70 font-medium leading-relaxed">
+                Every transaction protected with escrow payments and insured shipments.
+              </p>
+            </div>
+
+            <div className="card-luxury p-7 group">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-gold-light flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                <Truck className="w-6 h-6 text-[#A68868]" />
+              </div>
+              <h3 className="font-heading text-xl font-bold text-black mb-2">Dropshipping Engine</h3>
+              <p className="text-xs sm:text-sm text-black/70 font-medium leading-relaxed">
+                Automated order routing from retailer to manufacturer to delivery with live tracking.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Interactive GSAP + Lenis Parallax Showcase */}
+      <ParallaxComponent />
+
+      {/* 3. Curated Collections - Explore by Category (Styled matching Luxe Cloud Trade) */}
+      <section className="py-12 sm:py-16">
+        <div className="max-w-7xl mx-auto space-y-12">
+          
+          {/* Section Header */}
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <p className="text-xs font-black text-[#A68868] uppercase tracking-widest">
+              Curated Collections
+            </p>
+            <h2 className="font-heading text-3xl sm:text-5xl font-bold text-black tracking-tight">
+              Explore by Category
+            </h2>
+            <p className="text-xs sm:text-sm text-black/70 font-semibold leading-relaxed">
+              From everyday elegance to bridal masterpieces — discover 10,000+ designs in the cloud catalogue.
+            </p>
+          </div>
+
+          {/* 6 Category Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {[
+              {
+                title: "Gold",
+                subtitle: "Timeless elegance",
+                count: "2,450+ designs",
+                image: "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=400&q=80",
+                delay: "0s",
+              },
+              {
+                title: "Diamond",
+                subtitle: "Brilliant cuts",
+                count: "1,820+ designs",
+                image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&q=80",
+                delay: "0.05s",
+              },
+              {
+                title: "Bridal",
+                subtitle: "For your big day",
+                count: "980+ designs",
+                image: "https://images.unsplash.com/photo-1535632787350-4e68ef0ac584?w=400&q=80",
+                delay: "0.1s",
+              },
+              {
+                title: "Silver",
+                subtitle: "Everyday charm",
+                count: "1,560+ designs",
+                image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&q=80",
+                delay: "0.15s",
+              },
+              {
+                title: "Platinum",
+                subtitle: "Modern luxury",
+                count: "720+ designs",
+                image: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=400&q=80",
+                delay: "0.2s",
+              },
+              {
+                title: "Temple",
+                subtitle: "Sacred heritage",
+                count: "540+ designs",
+                image: "https://images.unsplash.com/photo-1604148494489-1dc9b4f6e2a2?w=400&q=80",
+                delay: "0.25s",
+              },
+            ].map((cat, idx) => (
+              <Link
+                key={idx}
+                to={`/customer/products?category=${encodeURIComponent(cat.title)}`}
+                className="group relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-[#CDD5DB]/60"
+              >
+                <img
+                  src={cat.image}
+                  alt={cat.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <h3 className="font-heading text-lg font-bold text-white leading-snug">
+                    {cat.title}
+                  </h3>
+                  <p className="text-[11px] text-white/80 font-medium">{cat.subtitle}</p>
+                  <p className="text-[11px] text-[#F3E1B9] font-bold mt-1 tracking-wide">
+                    {cat.count}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
+      {/* Dropshipping Engine Workflow (Styled matching Luxe Cloud Trade Dropshipping Engine) */}
+      <section className="py-12 sm:py-16">
+        <div className="max-w-7xl mx-auto space-y-12">
+          
+          {/* Header */}
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <p className="text-xs font-black text-[#A68868] uppercase tracking-widest">
+              Dropshipping Engine
+            </p>
+            <h2 className="font-heading text-3xl sm:text-5xl font-bold text-black tracking-tight">
+              How AuraCraft Works
+            </h2>
+            <p className="text-xs sm:text-sm text-black/70 font-semibold leading-relaxed">
+              Automated order routing from customer to delivery — fully tracked, insured, and seamless.
+            </p>
+          </div>
+
+          {/* 6 Step Cards */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                step: "01",
+                title: "Customer Orders",
+                desc: "Customer places order on retailer's storefront",
+                icon: Package,
+              },
+              {
+                step: "02",
+                title: "Platform Validates",
+                desc: "Order routed through cloud inventory system",
+                icon: Globe,
+              },
+              {
+                step: "03",
+                title: "Manufacturer Accepts",
+                desc: "Assigned manufacturer begins production/picking",
+                icon: Factory,
+              },
+              {
+                step: "04",
+                title: "QC & Packaging",
+                desc: "Quality check, hallmarking, and secure packaging",
+                icon: Shield,
+              },
+              {
+                step: "05",
+                title: "Insured Delivery",
+                desc: "Courier allocation with full insurance coverage",
+                icon: Truck,
+              },
+              {
+                step: "06",
+                title: "Settlement",
+                desc: "Commission distribution and automatic settlement",
+                icon: Coins,
+              },
+            ].map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={idx}
+                  className="relative card-luxury p-7 group border border-[#CDD5DB] flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-4 mb-4">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-gold flex items-center justify-center shadow-gold group-hover:scale-110 transition-transform">
+                        <Icon className="w-6 h-6 text-white" />
+                      </div>
+                      <span className="font-heading text-3xl font-bold text-black/25">
+                        {item.step}
+                      </span>
+                    </div>
+                    <h3 className="font-heading text-xl font-bold text-black mb-1">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-black/70 font-medium leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </div>
+
+                  {idx < 5 && (
+                    <ArrowRight className="absolute -right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A68868]/40 hidden lg:block" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+        </div>
+      </section>
+
+      {/* 24K Digital Gold Showcase (Styled matching Luxe Cloud Trade Digital Gold) */}
+      <section id="digital-gold" className="py-12 sm:py-16 bg-gradient-to-br from-[#FAF8F5] via-white to-[#E3C39D]/20 rounded-3xl p-6 sm:p-10 border border-[#CDD5DB]/60">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+          
+          {/* Left Column: Details & Bullet points */}
+          <div className="space-y-6">
+            <div className="inline-flex items-center gap-2 glass-ivory px-4 py-2 rounded-full border border-[#D4AF37]/40 shadow-xs">
+              <Coins className="w-4 h-4 text-[#A68868]" />
+              <span className="text-xs sm:text-sm font-black text-[#A68868] uppercase tracking-wider">
+                Digital Gold
+              </span>
+            </div>
+
+            <h2 className="font-heading text-3xl sm:text-5xl font-bold leading-tight text-black">
+              Buy, Sell & Gift <span className="text-gold-gradient">24K Digital Gold</span>
+            </h2>
+
+            <p className="text-xs sm:text-sm text-black/80 font-semibold leading-relaxed max-w-xl">
+              Offer your customers the ability to invest in digital gold with live pricing, secure vault storage, and instant redemption. No minimum investment.
             </p>
 
-            <div>
+            {/* 6 Bullet Points */}
+            <div className="space-y-3 pt-2">
+              {[
+                "Live 24K gold pricing with real-time updates",
+                "Secure vault with insured storage",
+                "Buy from ₹100 — no minimum",
+                "Gift gold to family & friends",
+                "Redeem online or at partner stores",
+                "Digital certificates for every purchase",
+              ].map((point, idx) => (
+                <div key={idx} className="flex items-center gap-3">
+                  <div className="w-5 h-5 rounded-full bg-gradient-gold flex items-center justify-center shrink-0 shadow-xs">
+                    <Check className="w-3 h-3 text-white stroke-[3]" />
+                  </div>
+                  <span className="text-xs sm:text-sm font-bold text-black">{point}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA Button */}
+            <div className="pt-4">
               <Link
-                to="/customer/products"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#A68868] hover:bg-[#8A6D4F] text-white text-xs font-black transition-all shadow-xs"
+                to="/gold-sip"
+                className="inline-flex items-center gap-2 bg-gradient-gold text-white px-7 py-3.5 rounded-full font-bold text-xs uppercase tracking-wide shadow-gold hover:shadow-gold-lg transition-all hover:scale-105"
               >
-                <span>Select Jewels</span>
+                <span>Start Investing</span>
+                <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-
-            {/* 3 Feature Pills */}
-            <div className="grid grid-cols-3 gap-3 pt-4 text-center">
-              <div className="p-3 rounded-2xl bg-white border border-[#CDD5DB] space-y-1">
-                <Gem className="w-4 h-4 mx-auto text-[#A68868]" />
-                <span className="block text-[10px] font-black text-black">Direct Supply</span>
-              </div>
-              <div className="p-3 rounded-2xl bg-white border border-[#CDD5DB] space-y-1">
-                <Flame className="w-4 h-4 mx-auto text-[#A68868]" />
-                <span className="block text-[10px] font-black text-black">Custom Cut</span>
-              </div>
-              <div className="p-3 rounded-2xl bg-white border border-[#CDD5DB] space-y-1">
-                <ShieldCheck className="w-4 h-4 mx-auto text-[#A68868]" />
-                <span className="block text-[10px] font-black text-black">Purity Guarantee</span>
-              </div>
-            </div>
           </div>
 
-          {/* Image Showcase */}
-          <div className="lg:col-span-6 flex justify-center">
-            <div className="w-full max-w-md rounded-3xl overflow-hidden border border-[#CDD5DB] shadow-lg bg-white p-2">
+          {/* Right Column: Visual Showcase & Floating Glass Portfolio Badge */}
+          <div className="relative flex justify-center">
+            <div className="aspect-square w-full max-w-md rounded-3xl overflow-hidden shadow-2xl border border-[#CDD5DB] relative group">
               <img
-                src={heroImg}
-                alt="AuraCraft Product Showcase"
-                className="w-full h-64 object-cover rounded-2xl"
+                src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80"
+                alt="Digital Gold Investment"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+            </div>
+
+            {/* Floating Glass Card */}
+            <div className="absolute -bottom-4 -left-4 sm:-left-6 glass-ivory rounded-2xl p-4 shadow-gold-lg border border-[#D4AF37]/40 backdrop-blur-md space-y-1">
+              <p className="text-[10px] text-black/70 font-black uppercase tracking-wider">
+                Portfolio Value
+              </p>
+              <p className="font-heading text-2xl font-bold text-black leading-tight">
+                ₹2,45,680
+              </p>
+              <p className="text-xs text-emerald-600 font-black flex items-center gap-1">
+                <TrendingUp className="w-3.5 h-3.5" /> +12.4% this year
+              </p>
             </div>
           </div>
 
         </div>
       </section>
+
+      {/* Gold Savings Scheme Section (Styled matching Luxe Cloud Trade Gold Scheme) */}
+      <section id="gold-scheme" className="py-12 sm:py-16">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+          
+          {/* Left Column: Visual Showcase & Floating Glass Badge */}
+          <div className="relative order-2 lg:order-1 flex justify-center">
+            <div className="aspect-square w-full max-w-md rounded-3xl overflow-hidden shadow-2xl border border-[#CDD5DB] relative group">
+              <img
+                src="https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=600&q=80"
+                alt="Gold Savings Scheme"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+            </div>
+
+            {/* Floating Top-Right Glass Badge */}
+            <div className="absolute -top-3 -right-3 sm:-right-4 glass-ivory rounded-2xl p-4 shadow-gold border border-[#D4AF37]/40 backdrop-blur-md">
+              <p className="text-xs text-[#A68868] font-black uppercase tracking-wider">11+1 Scheme</p>
+              <p className="font-heading text-xl font-bold text-black">Pay 11, Get 12</p>
+            </div>
+          </div>
+
+          {/* Right Column: Details & 4 Feature Cards */}
+          <div className="order-1 lg:order-2 space-y-6">
+            <div className="inline-flex items-center gap-2 glass-ivory px-4 py-2 rounded-full border border-[#D4AF37]/40 shadow-xs">
+              <Gem className="w-4 h-4 text-[#A68868]" />
+              <span className="text-xs sm:text-sm font-black text-[#A68868] uppercase tracking-wider">
+                Gold Savings Scheme
+              </span>
+            </div>
+
+            <h2 className="font-heading text-3xl sm:text-5xl font-bold leading-tight text-black">
+              Help Customers <span className="text-gold-gradient">Save for Gold</span>
+            </h2>
+
+            <p className="text-xs sm:text-sm text-black/80 font-semibold leading-relaxed max-w-xl">
+              Offer flexible gold purchase schemes — monthly, weekly, 11+1, 10+1, and custom plans. Auto-debit via UPI AutoPay, digital passbook, and maturity calculator.
+            </p>
+
+            {/* 4 Feature Stat Cards Grid */}
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="card-luxury p-5 border border-[#CDD5DB]">
+                <p className="font-heading text-2xl sm:text-3xl font-bold text-[#A68868]">6+</p>
+                <p className="text-xs text-black/70 font-black uppercase tracking-wider">Scheme Types</p>
+              </div>
+
+              <div className="card-luxury p-5 border border-[#CDD5DB]">
+                <p className="font-heading text-2xl sm:text-3xl font-bold text-[#A68868]">UPI</p>
+                <p className="text-xs text-black/70 font-black uppercase tracking-wider">Auto-Debit</p>
+              </div>
+
+              <div className="card-luxury p-5 border border-[#CDD5DB]">
+                <p className="font-heading text-2xl sm:text-3xl font-bold text-[#A68868]">Flexible</p>
+                <p className="text-xs text-black/70 font-black uppercase tracking-wider">Maturity</p>
+              </div>
+
+              <div className="card-luxury p-5 border border-[#CDD5DB]">
+                <p className="font-heading text-2xl sm:text-3xl font-bold text-[#A68868]">Supported</p>
+                <p className="text-xs text-black/70 font-black uppercase tracking-wider">Nominee</p>
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <div className="pt-2">
+              <Link
+                to="/gold-sip"
+                className="inline-flex items-center gap-2 bg-gradient-gold text-white px-7 py-3.5 rounded-full font-bold text-xs uppercase tracking-wide shadow-gold hover:shadow-gold-lg transition-all hover:scale-105"
+              >
+                <span>Explore Schemes</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+
+
 
     </div>
   );

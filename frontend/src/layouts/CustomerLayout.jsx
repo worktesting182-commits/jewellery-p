@@ -22,10 +22,13 @@ import {
   Globe,
   Share2,
   Coins,
+  Mail,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { cartAPI } from "../services/api";
 import illustrationImg from "../assets/Illustration.png";
+
+import GoldTickerBar from "../components/common/GoldTickerBar";
 
 export default function CustomerLayout() {
   const location = useLocation();
@@ -116,111 +119,32 @@ export default function CustomerLayout() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8F6F2] text-black flex flex-col font-sans selection:bg-[#A68868] selection:text-white">
-      {/* Top Announcement Bar */}
-      <div className="bg-[#A68868] text-white py-2 px-4 text-center text-xs font-bold tracking-wide shadow-xs flex items-center justify-center gap-2">
-        <Sparkles className="w-3.5 h-3.5 text-[#E3C39D] animate-pulse" />
-        <span>Explore Handcrafted Hallmark Certified Jewellery Direct from Master Artisans</span>
-        <Sparkles className="w-3.5 h-3.5 text-[#E3C39D] animate-pulse" />
-      </div>
+    <div className="min-h-screen bg-[#FBF9F5] text-black flex flex-col font-sans selection:bg-[#A68868] selection:text-white">
+      {/* Live Precious Metals Ticker Bar */}
+      <GoldTickerBar />
 
-      {/* Main Header / Navigation */}
-      <header className="sticky top-0 z-40 bg-[#F8F6F2]/95 backdrop-blur-md border-b border-[#CDD5DB] shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            
-            {/* Brand Logo */}
-            <Link to="/customer/home" className="flex items-center gap-3 group">
-              <div className="w-11 h-11 rounded-2xl bg-[#A68868] flex items-center justify-center text-white shadow-md group-hover:bg-[#8A6D4F] transition-all duration-300">
-                <Gem className="w-6 h-6" />
-              </div>
-              <div>
-                <span className="text-xl font-black text-black tracking-tight group-hover:text-[#A68868] transition-colors">
-                  AuraCraft
-                </span>
-                <span className="block text-[10px] uppercase tracking-widest text-[#A68868] font-bold">
-                  Luxury Jewellery
-                </span>
-              </div>
-            </Link>
 
-            {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1 bg-[#CDD5DB]/40 p-1.5 rounded-full border border-[#CDD5DB]">
-              {navLinks.map((link) => {
-                const Icon = link.icon;
-                const isActive = location.pathname === link.href;
-                return (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-extrabold tracking-wide transition-all duration-200 relative ${
-                      isActive
-                        ? "bg-[#A68868] text-white shadow-sm"
-                        : "text-black hover:text-[#A68868] hover:bg-[#E3C39D]/30"
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-[#A68868]"}`} />
-                    <span className="font-extrabold">{link.name}</span>
-                    {Boolean(link.badge) && link.badge > 0 && (
-                      <span className="px-2 py-0.5 rounded-full bg-[#E3C39D] text-[10px] font-black text-black leading-tight shadow-xs">
-                        {link.badge}
-                      </span>
-                    )}
-                  </Link>
-                );
-              })}
-            </nav>
-
-            {/* User Profile & Actions */}
-            <div className="hidden sm:flex items-center gap-3">
-              <StoreSwitcher />
-              <NotificationBell />
-
-              <Link
-                to="/customer/cart"
-                className="px-5 py-2.5 rounded-full bg-[#A68868] hover:bg-[#8A6D4F] text-white text-xs font-extrabold tracking-wide shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2"
-              >
-                <ShoppingCart className="w-4 h-4" />
-                <span>Cart ({cartCount})</span>
-              </Link>
-
-              <Link
-                to="/customer/profile"
-                className="flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-[#E3C39D]/40 hover:bg-[#E3C39D]/70 border border-[#A68868]/40 transition-all group"
-              >
-                <div className="w-7 h-7 rounded-full bg-[#A68868] text-white flex items-center justify-center text-xs font-bold">
-                  {user?.full_name ? user.full_name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
-                </div>
-                <span className="text-xs font-extrabold text-black group-hover:text-[#A68868]">
-                  {user?.full_name || "Customer"}
-                </span>
-              </Link>
-
-              <button
-                onClick={handleLogout}
-                className="p-2 rounded-full bg-[#CDD5DB]/50 hover:bg-rose-100 text-[#A68868] hover:text-rose-600 border border-[#CDD5DB] transition-all duration-200"
-                title="Logout"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
+      {/* Main Header / Navigation (Styled matching Luxe Cloud Trade Header) */}
+      <header className="sticky top-0 z-50 transition-all duration-300 glass shadow-sm py-3">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          
+          {/* Brand Logo */}
+          <Link to="/customer/home" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold transition-transform group-hover:scale-105">
+              <Gem className="w-5 h-5 text-white" />
             </div>
-
-            {/* Mobile Menu Button */}
-            <div className="flex md:hidden items-center gap-2">
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2.5 rounded-full bg-[#A68868] text-white"
-              >
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
+            <div className="leading-tight">
+              <span className="font-heading text-xl font-bold tracking-tight text-black group-hover:text-[#A68868] transition-colors">
+                AuraCraft
+              </span>
+              <span className="block text-[10px] text-black/60 tracking-widest uppercase -mt-0.5 font-semibold">
+                Luxury Jewellery
+              </span>
             </div>
+          </Link>
 
-          </div>
-        </div>
-
-        {/* Mobile Nav Dropdown */}
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-[#F8F6F2] border-b border-[#CDD5DB] px-4 pt-2 pb-4 space-y-2">
+          {/* Desktop Navigation Links with Luxe Hover Indicators */}
+          <div className="hidden lg:flex items-center gap-7">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = location.pathname === link.href;
@@ -228,42 +152,119 @@ export default function CustomerLayout() {
                 <Link
                   key={link.href}
                   to={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-extrabold ${
-                    isActive
-                      ? "bg-[#A68868] text-white"
-                      : "text-black hover:bg-[#E3C39D]/30"
+                  className={`text-sm font-medium transition-colors relative group flex items-center gap-1.5 py-1 ${
+                    isActive ? "text-[#A68868] font-bold" : "text-black/80 hover:text-[#A68868]"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon className="w-4 h-4" />
-                    <span>{link.name}</span>
-                  </div>
+                  <Icon className={`w-4 h-4 ${isActive ? "text-[#A68868]" : "text-black/60 group-hover:text-[#A68868]"}`} />
+                  <span>{link.name}</span>
                   {Boolean(link.badge) && link.badge > 0 && (
-                    <span className="px-2 py-0.5 rounded-full bg-[#E3C39D] text-black text-[10px] font-black">
+                    <span className="px-2 py-0.5 rounded-full bg-[#E3C39D] text-[10px] font-black text-black leading-tight shadow-xs">
                       {link.badge}
                     </span>
                   )}
+                  <span
+                    className={`absolute -bottom-1 left-0 h-0.5 bg-[#A68868] transition-all duration-300 ${
+                      isActive ? "w-full" : "w-0 group-hover:w-full"
+                    }`}
+                  />
                 </Link>
               );
             })}
-            <div className="pt-3 border-t border-[#CDD5DB] flex justify-between items-center px-2">
-              <Link
-                to="/customer/profile"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-xs font-black text-black flex items-center gap-2"
-              >
-                <User className="w-4 h-4 text-[#A68868]" /> Profile Settings
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="text-xs font-black text-rose-600 hover:underline"
-              >
-                Logout
-              </button>
-            </div>
           </div>
-        )}
+
+          {/* Actions & Controls */}
+          <div className="hidden sm:flex items-center gap-3">
+            <StoreSwitcher />
+            <NotificationBell />
+
+            <Link
+              to="/customer/cart"
+              className="bg-gradient-gold text-white px-5 py-2 rounded-full text-xs font-semibold shadow-gold hover:shadow-gold-lg transition-all duration-300 hover:scale-105 flex items-center gap-2"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              <span>Cart ({cartCount})</span>
+            </Link>
+
+            <Link
+              to="/customer/profile"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#E3C39D]/30 hover:bg-[#E3C39D]/60 border border-[#A68868]/30 transition-all group"
+            >
+              <div className="w-6 h-6 rounded-full bg-[#A68868] text-white flex items-center justify-center text-xs font-bold">
+                {user?.full_name ? user.full_name.charAt(0).toUpperCase() : <User className="w-3.5 h-3.5" />}
+              </div>
+              <span className="text-xs font-extrabold text-black group-hover:text-[#A68868]">
+                {user?.full_name || "Customer"}
+              </span>
+            </Link>
+
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-full bg-[#CDD5DB]/40 hover:bg-rose-100 text-[#A68868] hover:text-rose-600 border border-[#CDD5DB] transition-all duration-200"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="flex lg:hidden items-center gap-2">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-xl bg-gradient-gold text-white shadow-gold"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+
+          {/* Mobile Nav Dropdown */}
+          {mobileMenuOpen && (
+            <div className="lg:hidden bg-[#FBF9F5] border-t border-[#CDD5DB] px-4 pt-3 pb-4 space-y-2 mt-3">
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                const isActive = location.pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-extrabold ${
+                      isActive
+                        ? "bg-[#A68868] text-white shadow-xs"
+                        : "text-black hover:bg-[#E3C39D]/30"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className="w-4 h-4" />
+                      <span>{link.name}</span>
+                    </div>
+                    {Boolean(link.badge) && link.badge > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-[#E3C39D] text-black text-[10px] font-black">
+                        {link.badge}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+              <div className="pt-3 border-t border-[#CDD5DB] flex justify-between items-center px-2">
+                <Link
+                  to="/customer/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-xs font-black text-black flex items-center gap-2"
+                >
+                  <User className="w-4 h-4 text-[#A68868]" /> Profile Settings
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="text-xs font-black text-rose-600 hover:underline"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          )}
+
+        </nav>
       </header>
 
       {/* Dynamic Content */}
@@ -271,105 +272,123 @@ export default function CustomerLayout() {
         <Outlet />
       </main>
 
-      {/* Footer Section */}
-      <footer className="bg-[#CDD5DB]/30 border-t border-[#CDD5DB] mt-16 pt-12 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          {/* Main Footer Card */}
-          <div className="bg-[#F8F6F2] rounded-3xl p-8 sm:p-10 border border-[#CDD5DB] shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
-            {/* Left Column: Store Details */}
-            <div className="lg:col-span-4 space-y-6">
-              <h3 className="text-xl font-black text-black tracking-tight">
-                Visit Our Experience Store!
-              </h3>
-              <ul className="space-y-4 text-xs font-extrabold text-black">
-                <li className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-[#A68868] shrink-0 mt-0.5" />
-                  <span>12 Bolshaya Nikitskaya St, City Centre</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Clock className="w-4 h-4 text-[#A68868] shrink-0" />
-                  <span>Daily: 08:00 – 21:00</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Phone className="w-4 h-4 text-[#A68868] shrink-0" />
-                  <span>+7 (495) 123-45-67</span>
-                </li>
-              </ul>
-            </div>
+      {/* Luxe Footer Section (Styled matching Luxe Cloud Trade Footer) */}
+      <footer className="bg-neutral-950 text-neutral-400 mt-16 border-t border-neutral-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+            {/* Brand Info Column */}
+            <div className="col-span-2">
+              <Link to="/customer/home" className="flex items-center gap-2.5 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold">
+                  <Gem className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <span className="font-heading text-xl font-bold text-white block">CJX</span>
+                  <span className="block text-[10px] text-neutral-500 tracking-widest uppercase">
+                    Cloud Jewellery Exchange
+                  </span>
+                </div>
+              </Link>
+              <p className="text-sm text-neutral-500 max-w-xs leading-relaxed mb-6">
+                The cloud-based B2B2C jewellery commerce ecosystem connecting manufacturers, retailers, and customers through one unified platform.
+              </p>
 
-            {/* Middle Column: Newsletter Subscription */}
-            <div className="lg:col-span-5 space-y-4">
-              <h3 className="text-xl font-black text-black tracking-tight">
-                Stay Updated on New Releases & Special Offers
-              </h3>
-              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2">
-                <input
-                  type="email"
-                  value={emailInput}
-                  onChange={(e) => setEmailInput(e.target.value)}
-                  placeholder="Your e-mail"
-                  required
-                  className="flex-1 px-4 py-3 rounded-full bg-white border border-[#CDD5DB] text-xs font-bold text-black placeholder-[#A68868]/60 focus:outline-none focus:ring-2 focus:ring-[#A68868]"
-                />
-                <button
-                  type="submit"
-                  className="px-6 py-3 rounded-full bg-[#A68868] hover:bg-[#8A6D4F] text-white text-xs font-black tracking-wide transition-all shadow-xs shrink-0"
+              {/* Social Media Icons */}
+              <div className="flex gap-3">
+                <a
+                  href="#"
+                  className="w-9 h-9 rounded-full bg-neutral-800 hover:bg-[#A68868] flex items-center justify-center transition-colors group"
                 >
-                  {subscribed ? "Subscribed!" : "Subscribe"}
-                </button>
-              </form>
-              {subscribed && (
-                <p className="text-xs text-emerald-800 font-black">Thank you for subscribing!</p>
-              )}
-            </div>
-
-            {/* Right Column: Illustration Asset Container */}
-            <div className="lg:col-span-3 flex justify-center lg:justify-end">
-              <div className="w-48 h-36 rounded-2xl bg-[#E3C39D]/30 overflow-hidden flex items-center justify-center p-2 border border-[#CDD5DB] shadow-inner">
-                <img
-                  src={illustrationImg}
-                  alt="AuraCraft Store Illustration"
-                  className="w-full h-full object-contain filter drop-shadow-sm"
-                />
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-facebook w-4 h-4 text-neutral-400 group-hover:text-white"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                </a>
+                <a
+                  href="#"
+                  className="w-9 h-9 rounded-full bg-neutral-800 hover:bg-[#A68868] flex items-center justify-center transition-colors group"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram w-4 h-4 text-neutral-400 group-hover:text-white"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
+                </a>
+                <a
+                  href="#"
+                  className="w-9 h-9 rounded-full bg-neutral-800 hover:bg-[#A68868] flex items-center justify-center transition-colors group"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-twitter w-4 h-4 text-neutral-400 group-hover:text-white"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
+                </a>
+                <a
+                  href="#"
+                  className="w-9 h-9 rounded-full bg-neutral-800 hover:bg-[#A68868] flex items-center justify-center transition-colors group"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-youtube w-4 h-4 text-neutral-400 group-hover:text-white"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"></path><path d="m10 15 5-3-5-3z"></path></svg>
+                </a>
               </div>
             </div>
 
+            {/* Platform */}
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Platform</h4>
+              <ul className="space-y-2.5">
+                <li><Link to="/customer/products" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Marketplace</Link></li>
+                <li><Link to="/customer/products" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Virtual Try-On</Link></li>
+                <li><Link to="/gold-sip" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Digital Gold</Link></li>
+                <li><Link to="/gold-sip" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Gold Scheme</Link></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Pricing</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">API Docs</a></li>
+              </ul>
+            </div>
+
+            {/* Solutions */}
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Solutions</h4>
+              <ul className="space-y-2.5">
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">For Retailers</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">For Manufacturers</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">For Wholesalers</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">For E-commerce</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Dropshipping</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">POS Integration</a></li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Company</h4>
+              <ul className="space-y-2.5">
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">About Us</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Careers</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Blog</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Case Studies</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Contact</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Book a Demo</a></li>
+              </ul>
+            </div>
+
+            {/* Support */}
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Support</h4>
+              <ul className="space-y-2.5">
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Help Center</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">FAQ</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Terms of Service</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Security</a></li>
+                <li><a href="#" className="text-sm text-neutral-500 hover:text-[#A68868] transition-colors">Status</a></li>
+              </ul>
+            </div>
           </div>
 
-          {/* Bottom Legal & Social Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-[#CDD5DB] text-xs font-extrabold text-black">
-            {/* Social Icons */}
-            <div className="flex items-center gap-4">
-              <a href="#telegram" className="p-2 rounded-full bg-[#CDD5DB]/60 hover:bg-[#A68868] hover:text-white transition-colors" title="Telegram">
-                <Send className="w-4 h-4 text-black" />
-              </a>
-              <a href="#website" className="p-2 rounded-full bg-[#CDD5DB]/60 hover:bg-[#A68868] hover:text-white transition-colors" title="Website">
-                <Globe className="w-4 h-4 text-black" />
-              </a>
-              <a href="#share" className="p-2 rounded-full bg-[#CDD5DB]/60 hover:bg-[#A68868] hover:text-white transition-colors" title="Share">
-                <Share2 className="w-4 h-4 text-black" />
-              </a>
+          <div className="border-t border-neutral-800 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-neutral-500">© 2026 Cloud Jewellery Exchange. All rights reserved.</p>
+            <div className="flex items-center gap-6 text-sm text-neutral-500">
+              <span className="flex items-center gap-1.5">
+                <Mail className="w-4 h-4 text-neutral-400" /> hello@cjx.com
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Phone className="w-4 h-4 text-neutral-400" /> +91 80-4567-8900
+              </span>
             </div>
-
-            {/* Copyright */}
-            <div className="font-black text-black">
-              © AuraCraft & Leaf & Grain, {new Date().getFullYear()}
-            </div>
-
-            {/* Policy links */}
-            <div className="flex items-center gap-6 text-[11px] font-black text-black">
-              <a href="#privacy" className="hover:underline">Privacy Policy</a>
-              <a href="#terms" className="hover:underline">Terms of Service</a>
-            </div>
-
           </div>
-
         </div>
       </footer>
       <RetailerCodeModal />
     </div>
   );
 }
-
