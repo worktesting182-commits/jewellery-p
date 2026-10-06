@@ -16,16 +16,12 @@ import {
   Flame,
   UserCheck,
   Home,
-  Check,
   Camera,
   TrendingUp,
   Coins,
   Layers,
   Brain,
   Shield,
-  Package,
-  Globe,
-  Factory,
 } from "lucide-react";
 import heroImg from "../../assets/hero.png";
 import threeWomenBanner from "../../assets/three women_banner.png";
@@ -433,176 +429,7 @@ export default function CustomerDashboard() {
         </div>
       </section>
 
-      {/* Dropshipping Engine Workflow (Styled matching Luxe Cloud Trade Dropshipping Engine) */}
-      <section className="py-12 sm:py-16">
-        <div className="max-w-7xl mx-auto space-y-12">
-          
-          {/* Header */}
-          <div className="text-center max-w-2xl mx-auto space-y-3">
-            <p className="text-xs font-black text-[#A68868] uppercase tracking-widest">
-              Dropshipping Engine
-            </p>
-            <h2 className="font-heading text-3xl sm:text-5xl font-bold text-black tracking-tight">
-              How AuraCraft Works
-            </h2>
-            <p className="text-xs sm:text-sm text-black/70 font-semibold leading-relaxed">
-              Automated order routing from customer to delivery — fully tracked, insured, and seamless.
-            </p>
-          </div>
 
-          {/* 6 Step Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                step: "01",
-                title: "Customer Orders",
-                desc: "Customer places order on retailer's storefront",
-                icon: Package,
-              },
-              {
-                step: "02",
-                title: "Platform Validates",
-                desc: "Order routed through cloud inventory system",
-                icon: Globe,
-              },
-              {
-                step: "03",
-                title: "Manufacturer Accepts",
-                desc: "Assigned manufacturer begins production/picking",
-                icon: Factory,
-              },
-              {
-                step: "04",
-                title: "QC & Packaging",
-                desc: "Quality check, hallmarking, and secure packaging",
-                icon: Shield,
-              },
-              {
-                step: "05",
-                title: "Insured Delivery",
-                desc: "Courier allocation with full insurance coverage",
-                icon: Truck,
-              },
-              {
-                step: "06",
-                title: "Settlement",
-                desc: "Commission distribution and automatic settlement",
-                icon: Coins,
-              },
-            ].map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={idx}
-                  className="relative card-luxury p-7 group border border-[#CDD5DB] flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center justify-between gap-4 mb-4">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-gold flex items-center justify-center shadow-gold group-hover:scale-110 transition-transform">
-                        <Icon className="w-6 h-6 text-white" />
-                      </div>
-                      <span className="font-heading text-3xl font-bold text-black/25">
-                        {item.step}
-                      </span>
-                    </div>
-                    <h3 className="font-heading text-xl font-bold text-black mb-1">
-                      {item.title}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-black/70 font-medium leading-relaxed">
-                      {item.desc}
-                    </p>
-                  </div>
-
-                  {idx < 5 && (
-                    <ArrowRight className="absolute -right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A68868]/40 hidden lg:block" />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-        </div>
-      </section>
-
-      {/* 24K Digital Gold Showcase (Styled matching Luxe Cloud Trade Digital Gold) */}
-      <section id="digital-gold" className="py-12 sm:py-16 bg-gradient-to-br from-[#FAF8F5] via-white to-[#E3C39D]/20 rounded-3xl p-6 sm:p-10 border border-[#CDD5DB]/60">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-          
-          {/* Left Column: Details & Bullet points */}
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 glass-ivory px-4 py-2 rounded-full border border-[#D4AF37]/40 shadow-xs">
-              <Coins className="w-4 h-4 text-[#A68868]" />
-              <span className="text-xs sm:text-sm font-black text-[#A68868] uppercase tracking-wider">
-                Digital Gold
-              </span>
-            </div>
-
-            <h2 className="font-heading text-3xl sm:text-5xl font-bold leading-tight text-black">
-              Buy, Sell & Gift <span className="text-gold-gradient">24K Digital Gold</span>
-            </h2>
-
-            <p className="text-xs sm:text-sm text-black/80 font-semibold leading-relaxed max-w-xl">
-              Offer your customers the ability to invest in digital gold with live pricing, secure vault storage, and instant redemption. No minimum investment.
-            </p>
-
-            {/* 6 Bullet Points */}
-            <div className="space-y-3 pt-2">
-              {[
-                "Live 24K gold pricing with real-time updates",
-                "Secure vault with insured storage",
-                "Buy from ₹100 — no minimum",
-                "Gift gold to family & friends",
-                "Redeem online or at partner stores",
-                "Digital certificates for every purchase",
-              ].map((point, idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-gradient-gold flex items-center justify-center shrink-0 shadow-xs">
-                    <Check className="w-3 h-3 text-white stroke-[3]" />
-                  </div>
-                  <span className="text-xs sm:text-sm font-bold text-black">{point}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA Button */}
-            <div className="pt-4">
-              <Link
-                to="/gold-sip"
-                className="inline-flex items-center gap-2 bg-gradient-gold text-white px-7 py-3.5 rounded-full font-bold text-xs uppercase tracking-wide shadow-gold hover:shadow-gold-lg transition-all hover:scale-105"
-              >
-                <span>Start Investing</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Right Column: Visual Showcase & Floating Glass Portfolio Badge */}
-          <div className="relative flex justify-center">
-            <div className="aspect-square w-full max-w-md rounded-3xl overflow-hidden shadow-2xl border border-[#CDD5DB] relative group">
-              <img
-                src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80"
-                alt="Digital Gold Investment"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-            </div>
-
-            {/* Floating Glass Card */}
-            <div className="absolute -bottom-4 -left-4 sm:-left-6 glass-ivory rounded-2xl p-4 shadow-gold-lg border border-[#D4AF37]/40 backdrop-blur-md space-y-1">
-              <p className="text-[10px] text-black/70 font-black uppercase tracking-wider">
-                Portfolio Value
-              </p>
-              <p className="font-heading text-2xl font-bold text-black leading-tight">
-                ₹2,45,680
-              </p>
-              <p className="text-xs text-emerald-600 font-black flex items-center gap-1">
-                <TrendingUp className="w-3.5 h-3.5" /> +12.4% this year
-              </p>
-            </div>
-          </div>
-
-        </div>
-      </section>
 
       {/* Gold Savings Scheme Section (Styled matching Luxe Cloud Trade Gold Scheme) */}
       <section id="gold-scheme" className="py-12 sm:py-16">

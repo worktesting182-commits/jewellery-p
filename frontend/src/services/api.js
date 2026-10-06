@@ -21,8 +21,8 @@ api.interceptors.request.use(async (config) => {
     }
 
     const activeRetailerId = localStorage.getItem("active_retailer_id");
-    if (activeRetailerId) {
-        config.headers["x-retailer-id"] = activeRetailerId;
+    if (activeRetailerId && activeRetailerId !== "undefined" && activeRetailerId !== "null" && activeRetailerId.trim() !== "") {
+        config.headers["x-retailer-id"] = activeRetailerId.trim();
     }
 
     return config;
