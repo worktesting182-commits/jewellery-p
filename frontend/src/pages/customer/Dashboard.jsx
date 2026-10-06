@@ -356,8 +356,8 @@ export default function CustomerDashboard() {
             </p>
           </div>
 
-          {/* 6 Category Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {/* 5 Category Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {[
               {
                 title: "Gold",
@@ -393,13 +393,6 @@ export default function CustomerDashboard() {
                 count: "720+ designs",
                 image: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=400&q=80",
                 delay: "0.2s",
-              },
-              {
-                title: "Temple",
-                subtitle: "Sacred heritage",
-                count: "540+ designs",
-                image: "https://images.unsplash.com/photo-1604148494489-1dc9b4f6e2a2?w=400&q=80",
-                delay: "0.25s",
               },
             ].map((cat, idx) => (
               <Link
