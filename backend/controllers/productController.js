@@ -239,6 +239,28 @@ export const getProducts = async (req, res) => {
             });
         }
 
+        // Fallback: If targeted retailer has 0 listings, fallback to all active platform listings
+        let effectiveListings = rListings;
+        if ((!effectiveListings || effectiveListings.length === 0) && targetRetailerId) {
+            const { data: fallbackListings } = await supabaseAdmin
+                .from("retailer_products")
+                .select(`
+                    *,
+                    manufacturer_product:manufacturer_products (
+                        id, name, description, material, purity, weight, category_id, status,
+                        category:categories (id, name),
+                        manufacturer:manufacturers(id, company_name)
+                    ),
+                    retailer:retailers (
+                        id, shop_name
+                    )
+                `)
+                .order("created_at", { ascending: false });
+            if (fallbackListings && fallbackListings.length > 0) {
+                effectiveListings = fallbackListings;
+            }
+        }
+
         // Fetch live gold/silver rates for dynamic pricing
         const liveRates = await getLatestBenchmarkRates();
 
@@ -252,7 +274,7 @@ export const getProducts = async (req, res) => {
         });
 
         // Format customer-facing product list
-        let formattedProducts = (rListings || []).map((listing) => {
+        let formattedProducts = (effectiveListings || []).map((listing) => {
             const mp = listing.manufacturer_product || {};
             const ret = listing.retailer || {};
             const imgUrl = imageMap.get(mp.id) || imageMap.get(listing.id);
